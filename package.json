@@ -1,0 +1,36 @@
+{
+  "name": "@runsidekick/sidekick-agent-nodejs-root",
+  "version": "1.0.0",
+  "description": "Sidekick node.js agent",
+  "main": "index.js",
+  "scripts": {
+    "test": "lerna exec npm run test",
+    "postinstall": "lerna bootstrap --hoist --ignore-scripts",
+    "clean:all": "lerna run --parallel clean",
+    "build:all": "lerna exec npm run build",
+    "clean-build:all": "npm-run-all -p clean:all -s build:all",
+    "prerelease": "lerna version ${RELEASE_SCALE} --no-push --exact --yes",
+    "release": "lerna publish from-package --ignore-scripts --no-verify-access --yes",
+    "postrelease": "git push --follow-tags origin"
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/runsidekick/sidekick-agent-nodejs.git"
+  },
+  "keywords": [],
+  "author": "Sidekick Team",
+  "license": "AGPL",
+  "bugs": {
+    "url": "https://github.com/runsidekick/sidekick-agent-nodejs/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "homepage": "https://github.com/runsidekick/sidekick-agent-nodejs#readme"
+}
