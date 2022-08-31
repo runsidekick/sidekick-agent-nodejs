@@ -1,1 +1,1 @@
-# sidekick-agent-nodejs
+./packages/sidekick-agent-nodejs/README.md
