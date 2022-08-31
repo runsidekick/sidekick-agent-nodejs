@@ -4,6 +4,7 @@ import {
   Frame,
 } from '../../../../types';
 import TypeCastUtils from '../../../../utils/TypeCastUtils';
+import JsonUtils from '../../../../utils/JsonUtils';
 
 export default class CaptureFrameConverter {
   static convert(
@@ -30,7 +31,7 @@ export default class CaptureFrameConverter {
       frames.push(frame);
       if (locals) {
         const resolveVariable = CaptureFrameConverter.findResolvedVariable(
-          JSON.parse(JSON.stringify(locals)), 
+          JSON.parse(JSON.stringify(locals, JsonUtils.getCircularReplacer())), 
           captureConfig.maxParseDepth);
         if (resolveVariable && !Array.isArray(resolveVariable)) {
           frame.variables = resolveVariable;
@@ -49,7 +50,7 @@ export default class CaptureFrameConverter {
     const arrayParser = (members: any[]) => {
       const parsedArr = [];
       const mLenght = members.length;
-      for (let i = 0; i < mLenght - 1; i++) {
+      for (let i = 0; i < mLenght; i++) {
         let value = members[i];
         const type = typeof value;
         if (TypeCastUtils.isObject(type)) { 
