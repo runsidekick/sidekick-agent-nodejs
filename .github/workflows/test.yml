@@ -22,6 +22,8 @@ jobs:
         run: npm install
       - name: NPM Test
         run: npm run test
+        env:
+          JEST_JUNIT_OUTPUT_DIR: "./report"
       - name: Analyze Test and/or Coverage Results
         uses: runforesight/foresight-test-kit-action@v1
         if: always()
