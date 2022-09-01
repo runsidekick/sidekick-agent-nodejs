@@ -1,4 +1,12 @@
-export default class JsonUtils { 
+export default class JsonUtils {
+    static stringify = (obj: any) => {
+        return JSON.stringify(obj, JsonUtils.getCircularReplacer());
+    }
+
+    static parse = (str: string) => {
+        return JSON.parse(str);
+    }
+
     static getCircularReplacer = () => {
         const seen = new WeakSet();
         return (key: any, value: any) => {

@@ -31,7 +31,7 @@ export default class CaptureFrameConverter {
       frames.push(frame);
       if (locals) {
         const resolveVariable = CaptureFrameConverter.findResolvedVariable(
-          JSON.parse(JSON.stringify(locals, JsonUtils.getCircularReplacer())), 
+          JsonUtils.parse(JsonUtils.stringify(locals)), 
           captureConfig.maxParseDepth);
         if (resolveVariable && !Array.isArray(resolveVariable)) {
           frame.variables = resolveVariable;

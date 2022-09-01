@@ -1,6 +1,6 @@
 const ConfigProvider = require('../../../dist/config/ConfigProvider').default;
 const ConfigMetadata = require('../../../dist/config/ConfigMetadata').default;
-const CaptureFrameConverter = require('../../../dist/api/internal/debug/tracepoint/converter/CaptureFrameConverter').default;
+const CaptureFrameConverter = require('../../../dist/api/internal/debug/converter/CaptureFrameConverter').default;
 const {
     Frames,
     CovertedFramesSchema,
