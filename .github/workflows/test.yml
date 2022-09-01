@@ -9,15 +9,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Collect Workflow Telemetry
+        uses: runforesight/foresight-workflow-kit-action@v1
+        with:
+          api_key: ${{ secrets.FORESIGHT_API_KEY }}
       - uses: actions/checkout@v2
-
       - name: Use Node.js 12.x
         uses: actions/setup-node@v2
         with:
           node-version: "12.x"
-
       - name: NPM Install
         run: npm install
-
       - name: NPM Test
         run: npm run test
+      - name: Analyze Test and/or Coverage Results
+        uses: runforesight/foresight-test-kit-action@v1
+        if: always()
+        with:
+          api_key: ${{ secrets.FORESIGHT_API_KEY }}
+          test_format: JUNIT
+          test_framework: JEST
+          test_path: packages/sidekick-agent-nodejs/report/junit.xml
