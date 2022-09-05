@@ -9,8 +9,8 @@ export default class TypeCastUtils {
         );
     }
 
-    static isObject(type: string): boolean {
-        return type === 'object';
+    static isObject(value: any): boolean {
+        return value && typeof value === 'object';
     }
 
     static isArray(value: any): boolean {

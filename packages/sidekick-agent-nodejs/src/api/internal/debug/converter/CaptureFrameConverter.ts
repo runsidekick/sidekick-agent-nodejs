@@ -4,13 +4,17 @@ import {
   Frame,
 } from '../../../../types';
 import TypeCastUtils from '../../../../utils/TypeCastUtils';
-import JsonUtils from '../../../../utils/JsonUtils';
+import PropertyAccessClassificationUtils from '../../../../utils/PropertyAccessClassificationUtils';
+import Logger from '../../../../logger';
 
 export default class CaptureFrameConverter {
-  static convert(
-    captureFrames: CaptureFrame[] = [],
-    captureConfig: CaptureConfig,
-    ): Frame[] {
+  protected captureConfig: CaptureConfig;
+
+  constructor(captureConfig: CaptureConfig,) {
+    this.captureConfig = captureConfig;
+  }
+
+  convert(captureFrames: CaptureFrame[] = []): Frame[] {
     const frames: Frame[] = [];
 
     captureFrames.forEach(captureFrame => {
@@ -30,9 +34,9 @@ export default class CaptureFrameConverter {
 
       frames.push(frame);
       if (locals) {
-        const resolveVariable = CaptureFrameConverter.findResolvedVariable(
-          JsonUtils.parse(JsonUtils.stringify(locals)), 
-          captureConfig.maxParseDepth);
+        const resolveVariable = this.findResolvedVariable(
+          locals, 
+          this.captureConfig.maxParseDepth);
         if (resolveVariable && !Array.isArray(resolveVariable)) {
           frame.variables = resolveVariable;
         }
@@ -42,7 +46,7 @@ export default class CaptureFrameConverter {
     return frames;
   }
 
-  private static findResolvedVariable(
+  private findResolvedVariable(
     locals: { [key: string]: any } | any[],
     maxParseDepth: number,
     iteration = 1,
@@ -52,11 +56,23 @@ export default class CaptureFrameConverter {
       const mLenght = members.length;
       for (let i = 0; i < mLenght; i++) {
         let value = members[i];
-        const type = typeof value;
-        if (TypeCastUtils.isObject(type)) { 
-          value = iteration > maxParseDepth 
-          ? '...'
-          : CaptureFrameConverter.findResolvedVariable(value, maxParseDepth, iteration + 1); 
+        const type = !this.captureConfig.bundled && value && value.constructor 
+          ? value.constructor.name || typeof value
+          : typeof value;
+        if (TypeCastUtils.isObject(value)) { 
+          if (Object.getOwnPropertyNames.length == 0) {
+            try {
+              value = value + '';
+            } catch (error) {
+              Logger.debug(`<CaptureFrameConverter> An error occured while parsing 
+                with type ${type}: ${error.message}`);
+              value = '';
+            }
+          } else {
+              value = iteration > maxParseDepth
+              ? '...'
+              : this.findResolvedVariable(value, maxParseDepth, iteration + 1);
+          }
         }
   
         const arrayFlag = Array.isArray(value);   
@@ -72,25 +88,39 @@ export default class CaptureFrameConverter {
   
     const objectParser = (members: { [key: string]: any }) => {
       const parsedVariable: { [key: string]: any } = {};
-      Object.keys(members || {}).forEach((member) => {
-        const name = member;
-        let value = members[member];
-        const type = typeof value;
-  
-        if (!parsedVariable[name]) { 
-          if (TypeCastUtils.isObject(type)) {
-            value = iteration > maxParseDepth 
-            ? '...'
-            : CaptureFrameConverter.findResolvedVariable(value, maxParseDepth, iteration + 1); 
-          } 
-          
-          const arrayFlag = Array.isArray(value);    
-          parsedVariable[name] = {
-            '@type': arrayFlag ? 'array' : type,
-            '@value': value,
-            ...( arrayFlag ? { '@array': true } : undefined )
+      PropertyAccessClassificationUtils.getProperties(
+        members, 
+        this.captureConfig.propertyAccessClassification)
+        .forEach((member) => {
+          const name = member;
+          let value = members[member];
+          const type = !this.captureConfig.bundled && value && value.constructor
+            ? value.constructor.name || typeof value
+            : typeof value;
+          if (!parsedVariable[name]) { 
+            if (TypeCastUtils.isObject(value)) {
+              if (Object.getOwnPropertyNames(value).length == 0) {
+                try {
+                  value = value + '';
+                } catch (error) {
+                  Logger.debug(`<CaptureFrameConverter> An error occured while parsing 
+                    field ${name} with type ${type}: ${error.message}`);
+                  value = '';
+                }
+              } else {
+                  value = iteration > maxParseDepth
+                  ? '...'
+                  : this.findResolvedVariable(value, maxParseDepth, iteration + 1);
+              }
+            } 
+            
+            const arrayFlag = Array.isArray(value);    
+            parsedVariable[name] = {
+              '@type': arrayFlag ? 'array' : type,
+              '@value': value,
+              ...( arrayFlag ? { '@array': true } : undefined )
+            }
           }
-        }
       });
   
       return parsedVariable;

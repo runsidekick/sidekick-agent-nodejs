@@ -7,7 +7,6 @@ import ErrorStackContext from './ErrorStackContext';
 import Logger from '../../../../logger';
 import { ConfigNames } from '../../../../config/ConfigNames';
 import ConfigProvider from '../../../../config/ConfigProvider';
-import CaptureFrameConverter from '../converter/CaptureFrameConverter';
 import CommunicationManager from '../../../external/communication/CommunicationManager';
 
 export default class ErrorStackAction extends CaptureProbeAction<ErrorStackContext> {
@@ -57,7 +56,7 @@ export default class ErrorStackAction extends CaptureProbeAction<ErrorStackConte
             return;
           }
       
-          convertedFrames = CaptureFrameConverter.convert(userFrames, this.captureConfig);
+          convertedFrames = this.captureFrameConverter.convert(userFrames);
           ({ className: fileName, lineNo, methodName} = convertedFrames[0]);
         } else {
           ({ path: fileName, line: lineNo } = this.resolveLocation(callFrame));

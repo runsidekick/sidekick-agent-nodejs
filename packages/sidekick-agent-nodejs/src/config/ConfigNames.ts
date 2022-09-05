@@ -1,4 +1,4 @@
-import { BaseConfig, CaptureFrame, LogMessageDataReductionInfo } from '../types';
+import { BaseConfig, CaptureFrame, LogMessageDataReductionInfo, PropertyAccessClassification } from '../types';
 import { LogLevel } from '../logger';
 
 export const ConfigNames = {
@@ -41,10 +41,14 @@ export const ConfigNames = {
         maxExpandFrames: 'SIDEKICK_AGENT_MAX_EXPAND_FRAMES',
         maxProperties: 'SIDEKICK_AGENT_MAX_PROPERTIES',
         maxParseDepth: 'SIDEKICK_AGENT_MAX_PARSE_DEPTH',
+        propertyAccessClassification: 'SIDEKICK_AGENT_PROPERTY_ACCESS_CLASSIFICATION',
+    },
+    sourceCode: {
+        bundled: 'SIDEKICK_AGENT_SOURCE_CODE_BUNDLED',
     },
     taskExecutionQueue : {
         concurrency: 'SIDEKICK_AGENT_TASK_EXECUTION_QUEUE_CONCURRENCY',
-        maxSize: 'SIDEKICK_AGENT_TASK_EXECUTION_MAX_SIZE'
+        maxSize: 'SIDEKICK_AGENT_TASK_EXECUTION_MAX_SIZE',
     },
     dataReduction: {
         captureFrame: 'captureFrame',
@@ -143,6 +147,12 @@ export interface SidekickConfig extends BaseConfig {
      * ``default 3``
      */
     maxParseDepth?: number,
+
+    /**
+     * Property Access Classification: Set enumerability and ownership of properties
+     * ``default ENUMERABLE-OWN``
+     */
+     propertyAccessClassification?: PropertyAccessClassification,
 
     /**
      * Reject on startup: Stop rejection on startup promise. 

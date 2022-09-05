@@ -1,5 +1,5 @@
 import * as inspector from 'inspector';
-import { CaptureConfig, CaptureFrame } from '../../../../types';
+import { CaptureConfig, CaptureFrame, PropertyAccessClassification } from '../../../../types';
 import ScriptStore from "../../../../store/script/ScriptStore";
 import V8InspectorApi from "../../v8/V8inspectorApi";
 import { DefaultProbeAction } from "./ProbeAction";
@@ -9,6 +9,7 @@ import CaptureUtils from '../../../../utils/CaptureUtils';
 import ConfigProvider from '../../../../config/ConfigProvider';
 import { ConfigNames } from '../../../../config/ConfigNames';
 import Logger from '../../../../logger';
+import CaptureFrameConverter from '../converter/CaptureFrameConverter';
 
 class CaptureFramer {
   protected v8InspectorApi: V8InspectorApi;
@@ -110,6 +111,7 @@ export default abstract class CaptureProbeAction<C extends ProbeContext> extends
   protected scriptStore: ScriptStore;
   protected v8InspectorApi: V8InspectorApi;
   protected captureFrameDataReductionCallback: (captureFrames: CaptureFrame[]) => CaptureFrame[] | undefined;
+  protected captureFrameConverter: CaptureFrameConverter;
 
   constructor(      
     context: C,
@@ -123,8 +125,12 @@ export default abstract class CaptureProbeAction<C extends ProbeContext> extends
       maxExpandFrames: ConfigProvider.get<number>(ConfigNames.capture.maxExpandFrames, 1),
       maxProperties: ConfigProvider.get<number>(ConfigNames.capture.maxProperties, 10),
       maxParseDepth: ConfigProvider.get<number>(ConfigNames.capture.maxParseDepth, 3),
+      propertyAccessClassification: 
+        ConfigProvider.get<PropertyAccessClassification>(ConfigNames.capture.propertyAccessClassification, 'ENUMERABLE-OWN'),
+      bundled: ConfigProvider.get<boolean>(ConfigNames.sourceCode.bundled, false),
     } as CaptureConfig;
 
+    this.captureFrameConverter = new CaptureFrameConverter(this.captureConfig);
     this.captureFrameDataReductionCallback = ConfigProvider.get<any>(ConfigNames.dataReduction.captureFrame);
   }
 
