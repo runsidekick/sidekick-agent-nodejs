@@ -152,7 +152,7 @@ export interface SidekickConfig extends BaseConfig {
      * Property Access Classification: Set enumerability and ownership of properties
      * ``default ENUMERABLE-OWN``
      */
-     propertyAccessClassification?: PropertyAccessClassification,
+    propertyAccessClassification?: PropertyAccessClassification,
 
     /**
      * Reject on startup: Stop rejection on startup promise. 

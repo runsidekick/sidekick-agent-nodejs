@@ -64,6 +64,7 @@ SidekickDebugger.start({
 | maxExpandFrames <number>                      | Optional          | SIDEKICK_AGENT_MAX_EXPAND_FRAMES              | 1
 | maxProperties <number>                        | Optional          | SIDEKICK_AGENT_MAX_PROPERTIES                 | 10
 | maxParseDepth <number>                        | Optional          | SIDEKICK_AGENT_MAX_PARSE_DEPTH                | 3
+| propertyAccessClassification <string>         | Optional          | SIDEKICK_AGENT_PROPERTY_ACCESS_CLASSIFICATION | ENUMERABLE-OWN
 | scriptPrefix <string>                         | Optional          | SIDEKICK_AGENT_SCRIPT_PREFIX                  | None
 | rejectOnStartup <boolean>                     | Optional          | SIDEKICK_AGENT_REJECT_ON_STARTUP              | false
 | captureFrameDataReductionCallback <function>  | Optional          |                                               | None
