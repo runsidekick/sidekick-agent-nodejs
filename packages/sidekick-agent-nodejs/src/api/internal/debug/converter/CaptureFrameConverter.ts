@@ -60,7 +60,7 @@ export default class CaptureFrameConverter {
           ? value.constructor.name || typeof value
           : typeof value;
         if (TypeCastUtils.isObject(value)) { 
-          if (Object.getOwnPropertyNames.length == 0) {
+          if (Object.getOwnPropertyNames(value).length == 0) {
             try {
               value = value + '';
             } catch (error) {
