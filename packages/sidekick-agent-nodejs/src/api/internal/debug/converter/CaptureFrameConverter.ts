@@ -56,7 +56,7 @@ export default class CaptureFrameConverter {
       const mLenght = members.length;
       for (let i = 0; i < mLenght; i++) {
         let value = members[i];
-        const type = !this.captureConfig.bundled && value && value.constructor 
+        const type = !this.captureConfig.minified && value && value.constructor 
           ? value.constructor.name || typeof value
           : typeof value;
         if (TypeCastUtils.isObject(value)) { 
@@ -94,7 +94,7 @@ export default class CaptureFrameConverter {
         .forEach((member) => {
           const name = member;
           let value = members[member];
-          const type = !this.captureConfig.bundled && value && value.constructor
+          const type = !this.captureConfig.minified && value && value.constructor
             ? value.constructor.name || typeof value
             : typeof value;
           if (!parsedVariable[name]) { 

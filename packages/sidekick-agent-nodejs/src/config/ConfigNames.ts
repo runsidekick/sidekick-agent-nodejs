@@ -44,7 +44,7 @@ export const ConfigNames = {
         propertyAccessClassification: 'SIDEKICK_AGENT_PROPERTY_ACCESS_CLASSIFICATION',
     },
     sourceCode: {
-        bundled: 'SIDEKICK_AGENT_SOURCE_CODE_BUNDLED',
+        minified: 'SIDEKICK_AGENT_SOURCE_CODE_MINIFIED',
     },
     taskExecutionQueue : {
         concurrency: 'SIDEKICK_AGENT_TASK_EXECUTION_QUEUE_CONCURRENCY',

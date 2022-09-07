@@ -731,7 +731,7 @@ export type CaptureConfig = {
   maxProperties: number;
   maxParseDepth: number;
   propertyAccessClassification: PropertyAccessClassification;
-  bundled: boolean;
+  minified: boolean;
 }
 
 export type LogMessageDataReductionInfo = {

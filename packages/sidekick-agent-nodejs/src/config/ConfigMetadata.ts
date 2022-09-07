@@ -117,8 +117,8 @@ export default {
         type: 'string',
         default: 'ENUMERABLE-OWN',
     },
-    [ConfigNames.sourceCode.bundled]: {
-        key: 'bundled',
+    [ConfigNames.sourceCode.minified]: {
+        key: 'minified',
         type: 'boolean',
         default: false,
     },

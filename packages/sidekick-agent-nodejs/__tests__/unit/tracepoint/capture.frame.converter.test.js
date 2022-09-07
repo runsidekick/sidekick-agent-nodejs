@@ -13,7 +13,7 @@ describe('Capture Frame Converter Test', function () {
         captureFrameConverter = new CaptureFrameConverter({
             maxExpandFrames: 1,
             maxFrames: 3,
-            bundled: false,
+            minified: false,
             maxParseDepth: 3,
             maxProperties: 20,
             propertyAccessClassification: 'ENUMERABLE-OWN'

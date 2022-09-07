@@ -127,7 +127,7 @@ export default abstract class CaptureProbeAction<C extends ProbeContext> extends
       maxParseDepth: ConfigProvider.get<number>(ConfigNames.capture.maxParseDepth, 3),
       propertyAccessClassification: 
         ConfigProvider.get<PropertyAccessClassification>(ConfigNames.capture.propertyAccessClassification, 'ENUMERABLE-OWN'),
-      bundled: ConfigProvider.get<boolean>(ConfigNames.sourceCode.bundled, false),
+      minified: ConfigProvider.get<boolean>(ConfigNames.sourceCode.minified, false),
     } as CaptureConfig;
 
     this.captureFrameConverter = new CaptureFrameConverter(this.captureConfig);
