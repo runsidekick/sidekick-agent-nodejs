@@ -74,9 +74,8 @@ SidekickDebugger.start({
 
 ### Valid Config Values
 
-'propertyAccessClassification' configuration can take one of below values.
-
-    ENUMERABLE-OWN    (default value)
-    ENUMERABLE-OWN-AND-ENUMERABLE-PARENT
-    ENUMERABLE-OWN-AND-NON-ENUMERABLE-OWN
-    ENUMERABLE-OWN-AND-NON-ENUMERABLE-OWN-ENUMERABLE-PARENT
+- `propertyAccessClassification` (`SIDEKICK_AGENT_PROPERTY_ACCESS_CLASSIFICATION`) configuration can take one of following values:
+  - `ENUMERABLE-OWN` (default value)
+  - `ENUMERABLE-OWN-AND-ENUMERABLE-PARENT`
+  - `ENUMERABLE-OWN-AND-NON-ENUMERABLE-OWN`
+  - `ENUMERABLE-OWN-AND-NON-ENUMERABLE-OWN-ENUMERABLE-PARENT`
