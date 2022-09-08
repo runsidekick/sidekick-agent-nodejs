@@ -8,7 +8,6 @@ import { ConfigNames } from '../../../../config/ConfigNames';
 import Application from '../../../../application/Application';
 import { CommunicationApiData } from "../../../../types";
 import Logger from '../../../../logger';
-import JsonUtils from "../../../../utils/JsonUtils";
 
 export default class DebugBrokerApi extends EventEmitter implements CommunicationApi {
     private static API_KEY_HEADER_NAME = "x-sidekick-api-key";
@@ -84,7 +83,7 @@ export default class DebugBrokerApi extends EventEmitter implements Communicatio
     send(data: CommunicationApiData): Promise<unknown> {
         return new Promise((resolve, reject) => {
             if (this.ws.readyState == 1) {
-                this.ws.send(JsonUtils.stringify(data), (err) => {
+                this.ws.send(JSON.stringify(data), (err) => {
                     if (err) {
                         return reject(err)
                     }
@@ -106,7 +105,7 @@ export default class DebugBrokerApi extends EventEmitter implements Communicatio
         });
 
         this.ws.on('message', (data) => {
-            const message = JsonUtils.parse(data.toString());
+            const message = JSON.parse(data.toString());
             this._emit(CommunicationApiEventNames.MESSAGE, message);
         });
         

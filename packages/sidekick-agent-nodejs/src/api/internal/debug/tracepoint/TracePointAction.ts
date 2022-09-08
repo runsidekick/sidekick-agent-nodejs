@@ -3,7 +3,6 @@ import { ProbeActions, TracePointSnapshotEvent, TracePointSnapshotFailedEvent, C
 import ScriptStore from '../../../../store/script/ScriptStore';
 import V8InspectorApi from '../../v8/V8inspectorApi';
 import CaptureProbeAction from '../probe/CaptureProbeAction';
-import CaptureFrameConverter from '../converter/CaptureFrameConverter';
 import TracePointContext from "./TracePointContext";
 import CommunicationManager from '../../../external/communication/CommunicationManager';
 import UuidUtils from '../../../../utils/UuidUtils';
@@ -46,7 +45,7 @@ export default class TracePointAction extends CaptureProbeAction<TracePointConte
           return;
         }
 
-        const convertedFrames = CaptureFrameConverter.convert(userFrames, this.captureConfig);
+        const convertedFrames = this.captureFrameConverter.convert(userFrames);
         const snapshotEvent = new TracePointSnapshotEvent(
           this.context.rawProbe.id,
           this.context.rawProbe.client,

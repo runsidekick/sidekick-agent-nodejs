@@ -730,6 +730,8 @@ export type CaptureConfig = {
   maxExpandFrames: number;
   maxProperties: number;
   maxParseDepth: number;
+  propertyAccessClassification: PropertyAccessClassification;
+  minified: boolean;
 }
 
 export type LogMessageDataReductionInfo = {
@@ -744,3 +746,9 @@ export type RateLimitResult =
 | 'OK'
 | 'HIT'
 | 'EXCEEDED';
+
+export type PropertyAccessClassification = 
+| 'ENUMERABLE-OWN'
+| 'ENUMERABLE-OWN-AND-ENUMERABLE-PARENT'
+| 'ENUMERABLE-OWN-AND-NON-ENUMERABLE-OWN'
+| 'ENUMERABLE-OWN-AND-NON-ENUMERABLE-OWN-ENUMERABLE-PARENT';

@@ -2,8 +2,6 @@
  * See deprecated source-map-resolve npm package
  */
 
-import JsonUtils from "../../../utils/JsonUtils"
-
 const atobb = require("atob")
 const urlLib = require("url")
 const pathLib = require("path")
@@ -33,7 +31,7 @@ function callbackAsync(callback: any, error: any, result: any) {
 
 export function parseMapToJSON(string: any, data: any) {
   try {
-    return JsonUtils.parse(string.replace(/^\)\]\}'/, ""))
+    return JSON.parse(string.replace(/^\)\]\}'/, ""))
   } catch (error) {
     error.sourceMapData = data
     throw error

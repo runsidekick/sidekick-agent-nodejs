@@ -112,6 +112,16 @@ export default {
         type: 'number',
         default: 3,
     },
+    [ConfigNames.capture.propertyAccessClassification]: {
+        key: 'propertyAccessClassification',
+        type: 'string',
+        default: 'ENUMERABLE-OWN',
+    },
+    [ConfigNames.sourceCode.minified]: {
+        key: 'minified',
+        type: 'boolean',
+        default: false,
+    },
     [ConfigNames.broker.client]: {
         key: 'brokerClient',
         type: 'string',
