@@ -71,3 +71,12 @@ SidekickDebugger.start({
 | logMessageDataReductionCallback <function>    | Optional          |                                               | None
 | errorCollectionEnable <boolean>               | Optional          | SIDEKICK_AGENT_ERROR_COLLECTION_ENABLE        | false
 | errorCollectionEnableCaptureFrame <boolean>   | Optional          | SIDEKICK_AGENT_ERROR_COLLECTION_CAPTURE_FRAME | false
+
+### Valid Config Values
+
+'propertyAccessClassification' configuration can take one of below values.
+
+    ENUMERABLE-OWN    (default value)
+    ENUMERABLE-OWN-AND-ENUMERABLE-PARENT
+    ENUMERABLE-OWN-AND-NON-ENUMERABLE-OWN
+    ENUMERABLE-OWN-AND-NON-ENUMERABLE-OWN-ENUMERABLE-PARENT
