@@ -56,7 +56,7 @@ describe('Tracepoint Snapshot Event Test', function () {
         const validateSnapshotEvent = (message) => {   
             const breakpoint = sidekick.debugApi.get(tracePointId);
             wsClient.removeListener('message', wsClientMessageHandler);
-            expect(message.tracePointId).toBe(tracePointId);
+            expect(message.tracePointId).toBe(tracePointId.replace('Tracepoint:', ''));
             expect(message.fileName).toBe(PutTracePointRequest.fileName);
             expect(message.lineNo).toBe(PutTracePointRequest.lineNo);
             expect(message.methodName).toBe('BreakpointMethod');
