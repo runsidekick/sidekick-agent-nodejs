@@ -131,7 +131,7 @@ export default class LogPointAction extends CaptureProbeAction<LogPointContext> 
       } = this.context.getProbe();
   
       const logPointEvent = new LogPointEvent(
-        id,
+        id.replace(`${this.context.rawProbe.action}:`, ''),
         client,
         remoteFilename || fileName,
         frame.methodName,
