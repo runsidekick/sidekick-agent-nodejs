@@ -56,7 +56,7 @@ describe('Logpoint Event Test', function () {
         const validateLogpointEvent = (message) => {   
             const breakpoint = sidekick.debugApi.get(logPointId);
             wsClient.removeListener('message', wsClientMessageHandler);
-            expect(message.logPointId).toBe(logPointId);
+            expect(message.logPointId).toBe(logPointId.replace('Logpoint:', ''));
             expect(message.fileName).toBe(PutLogPointRequest.fileName);
             expect(message.lineNo).toBe(PutLogPointRequest.lineNo);
             expect(message.methodName).toBe('BreakpointMethod');

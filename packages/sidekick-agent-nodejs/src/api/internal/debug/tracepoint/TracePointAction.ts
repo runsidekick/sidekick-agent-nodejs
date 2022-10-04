@@ -47,7 +47,7 @@ export default class TracePointAction extends CaptureProbeAction<TracePointConte
 
         const convertedFrames = this.captureFrameConverter.convert(userFrames);
         const snapshotEvent = new TracePointSnapshotEvent(
-          this.context.rawProbe.id,
+          this.context.rawProbe.id.replace(`${this.context.rawProbe.action}:`, ''),
           this.context.rawProbe.client,
           this.context.rawProbe.remoteFilename || this.context.rawProbe.fileName,
           convertedFrames && convertedFrames[0] ? convertedFrames[0].methodName : '',
