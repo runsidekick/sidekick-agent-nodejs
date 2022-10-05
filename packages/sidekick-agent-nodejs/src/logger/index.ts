@@ -27,6 +27,10 @@ export default {
         logger.debug('', message);
     },
     error: (message: string, err?: Error): void => {
-        logger.error('', message, err);
+        if (err) {
+            logger.error('', message, err);
+        } else {
+            logger.error('', message);
+        }
     }
 };

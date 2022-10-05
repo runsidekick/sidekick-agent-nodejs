@@ -14,6 +14,7 @@ export default class CommunicationApiListener extends MessageHandlerListener {
     protected debugApi: DebugApi;
     protected firstConnection = true;
     protected retryConnection = true;
+    private errorMessageDisplayed = false;
 
     constructor(
         communicationApi: CommunicationApi,
@@ -35,7 +36,8 @@ export default class CommunicationApiListener extends MessageHandlerListener {
 
                 const open = () => {
                     this.firstConnection = false;
-                    Logger.debug('<CommunicationApiListener> Communication api listening.');
+                    this.errorMessageDisplayed = false;
+                    Logger.info('<CommunicationApiListener> Communication api listening.');
                     CommunicationManager.setCommunicationApi(this.communicationApi);
                     this.apiStatus.setStatus(this.communicationApi.constructor.name, true);
                     this.communicationApi.on(CommunicationApiEventNames.MESSAGE, this.onMessage);
@@ -44,8 +46,12 @@ export default class CommunicationApiListener extends MessageHandlerListener {
                     resolve();
                 }
 
-                const error = (message: string) => {
-                    Logger.error(`<CommunicationApiListener> An error occured on socket connection: ${message}`);
+                const error = ({ message }: { reload: boolean, message: string }) => {
+                    if (!this.errorMessageDisplayed) {
+                        Logger.error(`<CommunicationApiListener> An error occured on socket connection: ${message}`);
+                        this.errorMessageDisplayed = true;
+                    }
+                 
                     if (this.firstConnection && message && message.includes('401')) {
                         this.retryConnection = false;
                     }

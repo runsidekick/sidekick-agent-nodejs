@@ -69,7 +69,7 @@ export default class DebugBrokerApi extends EventEmitter implements Communicatio
     }
 
     reconnect(): void {
-        this.tryConnect();
+        this.tryConnect(true);
     }
 
     close(): void {
@@ -96,7 +96,7 @@ export default class DebugBrokerApi extends EventEmitter implements Communicatio
         })
     }
 
-    private tryConnect() {
+    private tryConnect(reload?: boolean) {
         this.ws = new WebSocket(`${this.address}/app`, this.options);
         this.ws.once('open', () => {
             Logger.debug('<DebugBrokerApi> Broker connection established')
@@ -112,7 +112,7 @@ export default class DebugBrokerApi extends EventEmitter implements Communicatio
         this.ws.on('error', (err) => {
             this.connected = true;
             Logger.debug(`<DebugBrokerApi> An error occured on broker connection. ${err.message}`)
-            this._emit(CommunicationApiEventNames.ERROR, err.message);
+            this._emit(CommunicationApiEventNames.ERROR, { reload, message: err.message });
         });
 
         this.ws.once('close', (code, reason) => {
