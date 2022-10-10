@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Collect Workflow Telemetry
         uses: runforesight/foresight-workflow-kit-action@v1
