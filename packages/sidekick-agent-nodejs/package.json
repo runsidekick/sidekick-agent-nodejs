@@ -14,7 +14,7 @@
     "url": "git+https://github.com/runsidekick/sidekick-agent-nodejs.git"
   },
   "scripts": {
-    "test": "jest --reporters=jest-junit",
+    "test": "jest --runInBand --forceExit --reporters=jest-junit",
     "pretest": "npm run build:tsc",
     "lint": "eslint src --ext .ts",
     "clean": "rimraf dist coverage tsconfig.tsbuildinfo",

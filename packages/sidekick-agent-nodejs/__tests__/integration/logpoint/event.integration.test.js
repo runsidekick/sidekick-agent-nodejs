@@ -51,41 +51,39 @@ describe('Logpoint Event Test', function () {
         }
     });
     
-    it('a', (done) => {
-        done();
-    })
-    // it('Check logpoint Event', (done) => {
-    //     const validateLogpointEvent = (message) => {   
-    //         const breakpoint = sidekick.debugApi.get(logPointId);
-    //         wsClient.removeListener('message', wsClientMessageHandler);
-    //         expect(message.logPointId).toBe(logPointId.replace('Logpoint:', ''));
-    //         expect(message.fileName).toBe(PutLogPointRequest.fileName);
-    //         expect(message.lineNo).toBe(PutLogPointRequest.lineNo);
-    //         expect(message.methodName).toBe('BreakpointMethod');
-    //         expect(message.logMessage).toBe('Hello Thundra!');
-    //         sidekick.debugApi.delete(breakpoint);
-    //         done();
+    
+    it('Check logpoint Event', (done) => {
+        const validateLogpointEvent = (message) => {   
+            const breakpoint = sidekick.debugApi.get(logPointId);
+            wsClient.removeListener('message', wsClientMessageHandler);
+            expect(message.logPointId).toBe(logPointId.replace('Logpoint:', ''));
+            expect(message.fileName).toBe(PutLogPointRequest.fileName);
+            expect(message.lineNo).toBe(PutLogPointRequest.lineNo);
+            expect(message.methodName).toBe('BreakpointMethod');
+            expect(message.logMessage).toBe('Hello Thundra!');
+            sidekick.debugApi.delete(breakpoint);
+            done();
             
-    //     }
+        }
         
-    //     const wsClientMessageHandler = (data) => {
-    //         try {
-    //             const message = JSON.parse(data.toString());
-    //             if (message.name === 'PutLogPointResponse') {
-    //                 BreakpointMethod({
-    //                     item1: 'Thundra!'
-    //                 });
-    //             }
+        const wsClientMessageHandler = (data) => {
+            try {
+                const message = JSON.parse(data.toString());
+                if (message.name === 'PutLogPointResponse') {
+                    BreakpointMethod({
+                        item1: 'Thundra!'
+                    });
+                }
                 
-    //             if (message.name === 'LogPointEvent') {
-    //                 validateLogpointEvent(message);
-    //             }
-    //         } catch (error) {
-    //             done(error);
-    //         }
-    //     }
+                if (message.name === 'LogPointEvent') {
+                    validateLogpointEvent(message);
+                }
+            } catch (error) {
+                done(error);
+            }
+        }
         
-    //     wsClient.on('message', wsClientMessageHandler);
-    //     wsClient.send(JSON.stringify(PutLogPointRequest));
-    // });
+        wsClient.on('message', wsClientMessageHandler);
+        wsClient.send(JSON.stringify(PutLogPointRequest));
+    });
 });
