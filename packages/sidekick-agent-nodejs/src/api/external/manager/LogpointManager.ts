@@ -36,6 +36,9 @@ export class DefaultLogpointManager implements LogpointManager {
                     expireCount: probe.expireCount,
                     disabled: !probe.enabled,
                     fileHash: probe.fileHash,
+                    logExpression: probe.logExpression,
+                    logLevel: probe.logLevel,
+                    stdoutEnabled: probe.stdoutEnabled
                 } as Logpoint;
     
                 if (client) {
