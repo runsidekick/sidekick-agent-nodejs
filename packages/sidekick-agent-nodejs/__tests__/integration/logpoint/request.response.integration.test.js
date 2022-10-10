@@ -60,6 +60,11 @@ describe('Logpoint reqeust & response Test', function () {
         const wsClientMessageHandler = (data) => {
             try {
                 const message = JSON.parse(data.toString());
+                if (message.erroneous) {
+                    done(new Error(message.errorMessage))
+                    return;
+                }
+
                 if (message.name === 'FilterLogPointsRequest') {
                     wsClient.removeListener('message', wsClientMessageHandler);
                     done();
@@ -84,6 +89,11 @@ describe('Logpoint reqeust & response Test', function () {
         const wsClientMessageHandler = (data) => {
             try {
                 const message = JSON.parse(data.toString());
+                if (message.erroneous) {
+                    done(new Error(message.errorMessage))
+                    return;
+                }
+
                 if (message.name === 'PutLogPointResponse') {
                     validateBreakpointStored();
                 }
@@ -116,6 +126,11 @@ describe('Logpoint reqeust & response Test', function () {
         const wsClientMessageHandler = (data) => {
             try {
                 const message = JSON.parse(data.toString());
+                if (message.erroneous) {
+                    done(new Error(message.errorMessage))
+                    return;
+                }
+
                 if (message.name === 'PutLogPointResponse') {
                     wsClient.send(JSON.stringify(DisableLogPointRequest));
                 }
@@ -151,6 +166,11 @@ describe('Logpoint reqeust & response Test', function () {
         const wsClientMessageHandler = (data) => {
             try {
                 const message = JSON.parse(data.toString());
+                if (message.erroneous) {
+                    done(new Error(message.errorMessage))
+                    return;
+                }
+
                 if (message.name === 'PutLogPointResponse') {
                     wsClient.send(JSON.stringify(UpdateLogPointRequest));
                 }

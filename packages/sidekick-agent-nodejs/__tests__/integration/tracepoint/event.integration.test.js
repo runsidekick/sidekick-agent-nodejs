@@ -69,6 +69,11 @@ describe('Tracepoint Snapshot Event Test', function () {
         const wsClientMessageHandler = (data) => {
             try {
                 const message = JSON.parse(data.toString());
+                if (message.erroneous) {
+                    done(new Error(message.errorMessage))
+                    return;
+                }
+                
                 if (message.name === 'PutTracePointResponse') {
                     BreakpointMethod();
                 }

@@ -60,6 +60,11 @@ describe('Tracepoint reqeust & response Test', function () {
         const wsClientMessageHandler = (data) => {
             try {
                 const message = JSON.parse(data.toString());
+                if (message.erroneous) {
+                    done(new Error(message.errorMessage))
+                    return;
+                }
+
                 if (message.name === 'FilterTracePointsRequest') {
                     wsClient.removeListener('message', wsClientMessageHandler);
                     done();
@@ -84,6 +89,11 @@ describe('Tracepoint reqeust & response Test', function () {
         const wsClientMessageHandler = (data) => {
             try {
                 const message = JSON.parse(data.toString());
+                if (message.erroneous) {
+                    done(new Error(message.errorMessage))
+                    return;
+                }
+
                 if (message.name === 'PutTracePointResponse') {
                     validateBreakpointStored();
                 }
@@ -116,6 +126,11 @@ describe('Tracepoint reqeust & response Test', function () {
         const wsClientMessageHandler = (data) => {
             try {
                 const message = JSON.parse(data.toString());
+                if (message.erroneous) {
+                    done(new Error(message.errorMessage))
+                    return;
+                }
+
                 if (message.name === 'PutTracePointResponse') {
                     wsClient.send(JSON.stringify(DisableTracePointRequest));
                 }
@@ -151,6 +166,11 @@ describe('Tracepoint reqeust & response Test', function () {
         const wsClientMessageHandler = (data) => {
             try {
                 const message = JSON.parse(data.toString());
+                if (message.erroneous) {
+                    done(new Error(message.errorMessage))
+                    return;
+                }
+
                 if (message.name === 'PutTracePointResponse') {
                     wsClient.send(JSON.stringify(UpdateTracePointRequest));
                 }
