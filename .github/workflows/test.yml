@@ -14,10 +14,10 @@ jobs:
         with:
           api_key: ${{ secrets.FORESIGHT_API_KEY }}
       - uses: actions/checkout@v2
-      - name: Use Node.js 12.x
+      - name: Use Node.js 14.x
         uses: actions/setup-node@v2
         with:
-          node-version: "12.x"
+          node-version: "14.x"
       - name: NPM Install
         run: npm install
       - name: NPM Test
