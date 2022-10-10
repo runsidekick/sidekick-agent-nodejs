@@ -32,7 +32,8 @@ describe('Tracepoint Snapshot Event Test', function () {
             brokerHost: 'ws://localhost',
             brokerPort: port,
             hashCheckDisable: true,
-            inMinute: 1
+            inMinute: 1,
+            logLevel: 'debug'
         });
 
         tracePointId = ProbeUtils.getProbeId({
@@ -73,7 +74,7 @@ describe('Tracepoint Snapshot Event Test', function () {
                     done(new Error(message.errorMessage))
                     return;
                 }
-                
+
                 if (message.name === 'PutTracePointResponse') {
                     BreakpointMethod();
                 }

@@ -31,7 +31,8 @@ describe('Logpoint Event Test', function () {
             brokerHost: 'ws://localhost',
             brokerPort: port,
             hashCheckDisable: true,
-            inMinute: 1
+            inMinute: 1,
+            logLevel: 'debug'
         });
 
         logPointId = ProbeUtils.getProbeId({

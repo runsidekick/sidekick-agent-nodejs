@@ -37,6 +37,7 @@ describe('Tracepoint reqeust & response Test', function () {
             brokerHost: 'ws://localhost',
             brokerPort: port,
             hashCheckDisable: true,
+            logLevel: 'debug'
         });
 
         tracePointId = ProbeUtils.getProbeId({
