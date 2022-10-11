@@ -5,7 +5,7 @@ const PutTracePointRequest = {
     client: 'test',
     tracePointId: '18',
     fileName:'breakpoint-method.js',
-    lineNo: 8,
+    lineNo: 4,
     fileHash: 'hash',
     expireCount: 3,
     action: 'Tracepoint',
