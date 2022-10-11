@@ -5,7 +5,7 @@ const PutLogPointRequest = {
     client: 'test',
     logPointId: '18',
     fileName: 'breakpoint-method.js',
-    lineNo: 8,
+    lineNo: 4,
     fileHash: 'hash',
     expireCount: 5,
     action: 'Logpoint',
