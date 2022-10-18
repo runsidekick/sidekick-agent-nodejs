@@ -23,7 +23,7 @@ import { DefaultConfigManager } from '../api/external/manager/ConfigManager';
 import ApplicationStatusTracePointProvider from '../application/status/tracepoint/ApplicationStatusTracePointProvider';
 import ApplicationStatusLogPointProvider from '../application/status/logpoint/ApplicationStatusLogPointProvider';
 import CommunicationManager from '../api/external/communication/CommunicationManager';
-import DisabledErrorCollectionActivateTask from '../scheduler/task/DisabledErrorCollectionActivateTask';
+import DisabledErrorCollectionEnableTask from '../scheduler/task/DisabledErrorCollectionEnableTask';
 
 export default class SidekickManager {
     private debugApi: DebugApi;
@@ -134,7 +134,7 @@ export default class SidekickManager {
         this.scheduler = new TaskScheduler([
             { period: 30, task: new ExpiredProbeCleanTask(probeStore) },
             { period: 60, task: new SendStatusTask() },
-            { period: 30, task: new DisabledErrorCollectionActivateTask(this.debugApi) },
+            { period: 30, task: new DisabledErrorCollectionEnableTask(this.debugApi) },
             { period: 300, task: new GetConfigTask() },
         ]);
 
