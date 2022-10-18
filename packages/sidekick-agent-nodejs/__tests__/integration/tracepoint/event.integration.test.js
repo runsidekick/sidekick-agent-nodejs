@@ -7,9 +7,8 @@ const {
 } = require('../../../dist'); 
 
 const { BreakpointMethod } = require('../../config/data/requestresponse/breakpoint-method');
-const { PutTracePointRequest } = require('../../config/data/requestresponse/tracepoint/data');
 
-const { ApplicationStatusEventSchema } = require('../../config/data/event/data');
+const { PutTracePointRequest } = require('../../config/data/requestresponse/tracepoint/data');
 
 const ProbeUtils = require('../../../dist/utils/ProbeUtils').default;
 
@@ -37,7 +36,8 @@ describe('Tracepoint Snapshot Event Test', function () {
 
         tracePointId = ProbeUtils.getProbeId({
             ...PutTracePointRequest,
-            id: PutTracePointRequest.tracePointId
+            id: PutTracePointRequest.tracePointId,
+            type: 'Tracepoint',
         });
     });
     
@@ -62,8 +62,7 @@ describe('Tracepoint Snapshot Event Test', function () {
             expect(message.methodName).toBe('BreakpointMethod');
             expect(message.frames).toBeTruthy();
             sidekick.debugApi.delete(breakpoint);
-            done();
-            
+            done(); 
         }
         
         const wsClientMessageHandler = (data) => {

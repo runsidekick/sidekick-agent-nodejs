@@ -5,7 +5,8 @@ import {
     BrokerResponse,
     CommunicationApiData,
     FilterTracePointsRequest,
-    FilterLogPointsRequest
+    FilterLogPointsRequest,
+    GetConfigRequest,
 } from "../types";
 import UuidUtils from "./UuidUtils";
 
@@ -38,6 +39,15 @@ export default class CommunicationUtils {
             customTags: applicationInfo.applicationTags
         },
         UuidUtils.generateId())
+    }
+
+    static createGetConfigRequest() {
+        const applicationInfo = Application.getApplicationInfo();
+        if (!applicationInfo) {
+            return;
+        }
+
+        return new GetConfigRequest(UuidUtils.generateId())
     }
 
     static appendResponseProperties(data: CommunicationApiData) { 

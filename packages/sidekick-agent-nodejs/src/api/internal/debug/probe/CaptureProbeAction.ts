@@ -8,8 +8,8 @@ import PathUtils from '../../../../utils/PathUtils';
 import CaptureUtils from '../../../../utils/CaptureUtils';
 import ConfigProvider from '../../../../config/ConfigProvider';
 import { ConfigNames } from '../../../../config/ConfigNames';
-import Logger from '../../../../logger';
 import CaptureFrameConverter from '../converter/CaptureFrameConverter';
+import Logger from '../../../../logger';
 
 class CaptureFramer {
   protected v8InspectorApi: V8InspectorApi;
@@ -87,12 +87,14 @@ class CaptureFramer {
   get(): { [key: string]: any } {
     let result: { [key: string]: any } = {};
     for (let i = 0; i < (this.scopes || []).length; i++) {
-      if (i > this.captureConfig.maxProperties) {
-        break;
-      }
-
       const scope = this.scopes[i];
-      for (const key of Object.keys(scope)) {
+      const keys = Object.keys(scope);
+      for (let j = 0; j < keys.length; j++) {
+        if (j + 1 > this.captureConfig.maxProperties) {
+          break;
+        }
+
+        const key = keys[j];
         if (result[key]) {
           /** todo: log */
           continue;
@@ -107,7 +109,6 @@ class CaptureFramer {
 }
 
 export default abstract class CaptureProbeAction<C extends ProbeContext> extends DefaultProbeAction<C> {
-  protected captureConfig: CaptureConfig;
   protected scriptStore: ScriptStore;
   protected v8InspectorApi: V8InspectorApi;
   protected captureFrameDataReductionCallback: (captureFrames: CaptureFrame[]) => CaptureFrame[] | undefined;
@@ -120,17 +121,7 @@ export default abstract class CaptureProbeAction<C extends ProbeContext> extends
   ){
     super(context, scriptStore, v8InspectorApi);
 
-    this.captureConfig = {
-      maxFrames: ConfigProvider.get<number>(ConfigNames.capture.maxFrames, 20),
-      maxExpandFrames: ConfigProvider.get<number>(ConfigNames.capture.maxExpandFrames, 1),
-      maxProperties: ConfigProvider.get<number>(ConfigNames.capture.maxProperties, 10),
-      maxParseDepth: ConfigProvider.get<number>(ConfigNames.capture.maxParseDepth, 3),
-      propertyAccessClassification: 
-        ConfigProvider.get<PropertyAccessClassification>(ConfigNames.capture.propertyAccessClassification, 'ENUMERABLE-OWN'),
-      minified: ConfigProvider.get<boolean>(ConfigNames.sourceCode.minified, false),
-    } as CaptureConfig;
-
-    this.captureFrameConverter = new CaptureFrameConverter(this.captureConfig);
+    this.captureFrameConverter = new CaptureFrameConverter();
     this.captureFrameDataReductionCallback = ConfigProvider.get<any>(ConfigNames.dataReduction.captureFrame);
   }
 
@@ -152,7 +143,7 @@ export default abstract class CaptureProbeAction<C extends ProbeContext> extends
 
     const frameCount = Math.min(
       callFrames.length,
-      this.captureConfig.maxFrames
+      ConfigProvider.get<number>(ConfigNames.capture.maxFrames)
     );
 
     for (let i = 0; i < frameCount; i++) {
@@ -160,7 +151,7 @@ export default abstract class CaptureProbeAction<C extends ProbeContext> extends
       const fullPath = this.resolveFullPath(frame);
       if (CaptureUtils.shouldFramePathBeResolved(fullPath)) {
         frames.push(
-          this.resolveFrame(frame, i < this.captureConfig.maxExpandFrames)
+          this.resolveFrame(frame, i < ConfigProvider.get<number>(ConfigNames.capture.maxExpandFrames))
         );
       }
     }
@@ -174,7 +165,7 @@ export default abstract class CaptureProbeAction<C extends ProbeContext> extends
   ): CaptureFrame {
     let locals: { [key: string]: any } = {}
     if (underFrameCap) {
-      const capturer = new CaptureFramer(this.v8InspectorApi, frame, this.captureConfig);
+      const capturer = new CaptureFramer(this.v8InspectorApi, frame, this.getCaptureConfig());
       capturer.capture();
       locals = capturer.get();
     }
@@ -225,5 +216,17 @@ export default abstract class CaptureProbeAction<C extends ProbeContext> extends
     }
 
     return this.scriptStore.getScriptRawFilePath(scriptId) || '';
+  }
+
+  protected getCaptureConfig(): CaptureConfig {
+    return {
+      maxFrames: ConfigProvider.get<number>(ConfigNames.capture.maxFrames, 10),
+      maxExpandFrames: ConfigProvider.get<number>(ConfigNames.capture.maxExpandFrames, 1),
+      maxProperties: ConfigProvider.get<number>(ConfigNames.capture.maxProperties, 10),
+      maxParseDepth: ConfigProvider.get<number>(ConfigNames.capture.maxParseDepth, 3),
+      propertyAccessClassification: 
+        ConfigProvider.get<PropertyAccessClassification>(ConfigNames.capture.propertyAccessClassification, 'ENUMERABLE-OWN'),
+      minified: ConfigProvider.get<boolean>(ConfigNames.sourceCode.minified, false)
+    } as CaptureConfig;
   }
 }

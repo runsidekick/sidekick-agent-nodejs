@@ -28,7 +28,7 @@ const DisableTracePointRequest = {
 };
 
 const UpdateTracePointRequest = {
-    id: '3',
+    id: '4',
     name: 'UpdateTracePointRequest',
     type: 'Request',
     client: 'test',
@@ -38,9 +38,25 @@ const UpdateTracePointRequest = {
     expireCount: 3,
 };
 
+const EnableProbeTagRequest = {
+    id: '5',
+    name: 'EnableProbeTagRequest',
+    type: 'Request',
+    tag: 'tag1'
+}
+
+const DisableProbeTagRequest = {
+    id: '6',
+    name: 'DisableProbeTagRequest',
+    type: 'Request',
+    tag: 'tag1'
+}
+
 module.exports = {
     PutTracePointRequest,
     EnableTracePointRequest,
     DisableTracePointRequest,
     UpdateTracePointRequest,
+    EnableProbeTagRequest,
+    DisableProbeTagRequest,
 }

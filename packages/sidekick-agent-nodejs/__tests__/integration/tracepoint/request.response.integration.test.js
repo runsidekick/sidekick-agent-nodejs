@@ -17,6 +17,8 @@ const {
 
 const ProbeUtils = require('../../../dist/utils/ProbeUtils').default;
 
+const { BreakpointMethod } = require('../../config/data/requestresponse/breakpoint-method');
+
 describe('Tracepoint reqeust & response Test', function () {
     jest.setTimeout(30000)
 
@@ -24,6 +26,10 @@ describe('Tracepoint reqeust & response Test', function () {
     let wsClient;
     let sidekick;
     let tracePointId;
+
+    const tag1 = 'tag1';
+    const tag2 = 'tag2';
+    const tags = [tag1, tag2];
 
     beforeAll(async () => {
         const port = await getRandomPort();
@@ -41,7 +47,8 @@ describe('Tracepoint reqeust & response Test', function () {
 
         tracePointId = ProbeUtils.getProbeId({
             ...PutTracePointRequest,
-            id: PutTracePointRequest.tracePointId
+            id: PutTracePointRequest.tracePointId,
+            type: 'Tracepoint',
         });
     });
 
@@ -86,6 +93,37 @@ describe('Tracepoint reqeust & response Test', function () {
                 const message = JSON.parse(data.toString());
                 if (message.name === 'PutTracePointResponse') {
                     validateBreakpointStored();
+                }
+            } catch (error) {
+                done(error);
+            }
+        }
+
+        wsClient.on('message', wsClientMessageHandler);
+        wsClient.send(JSON.stringify(PutTracePointRequest));
+    });
+
+    it('Check PutTracePointRequest Actions', (done) => {
+        const validateBreakpointActions= (message) => {
+            const breakpoint = sidekick.debugApi.get(tracePointId);
+            wsClient.removeListener('message', wsClientMessageHandler);
+            expect(breakpoint).toBeTruthy();
+            expect(message.erroneous).toBe(false);
+            expect(breakpoint.tags).toBeUndefined();
+            expect(breakpoint.actions).toBeTruthy();
+            expect(breakpoint.actions.length).toBe(3);
+            expect(breakpoint.actions.includes('ConditionAwareProbeAction')).toBe(true);
+            expect(breakpoint.actions.includes('RateLimitedProbeAction')).toBe(true);
+            expect(breakpoint.actions.includes('ExpiringProbeAction')).toBe(true);
+            sidekick.debugApi.delete(breakpoint);
+            done();
+        }
+
+        const wsClientMessageHandler = (data) => {
+            try {
+                const message = JSON.parse(data.toString());
+                if (message.name === 'PutTracePointResponse') {
+                    validateBreakpointActions(message);
                 }
             } catch (error) {
                 done(error);
@@ -167,7 +205,7 @@ describe('Tracepoint reqeust & response Test', function () {
         wsClient.send(JSON.stringify(PutTracePointRequest));
     });
 
-    it('Check PutTracePointRequest Failed', (done) => {
+    it('Check Failed', (done) => {
         const validateFailed = (message) => {
             const breakpoint = sidekick.debugApi.get(tracePointId);
             wsClient.removeListener('message', wsClientMessageHandler);
@@ -198,7 +236,7 @@ describe('Tracepoint reqeust & response Test', function () {
         wsClient.send(JSON.stringify(_putTracePointRequest));
     });
 
-    it('Check PutTracePointRequest Condition Failed', (done) => {
+    it('Check Condition Failed', (done) => {
         const validateFailed = (message) => {
             const breakpoint = sidekick.debugApi.get(tracePointId);
             wsClient.removeListener('message', wsClientMessageHandler);
@@ -229,7 +267,7 @@ describe('Tracepoint reqeust & response Test', function () {
         wsClient.send(JSON.stringify(_putTracePointRequest));
     });
 
-    it('Check PutTracePointRequest Allread Exist', (done) => {
+    it('Check Allread Exist', (done) => {
         const validateFailed = (message) => {
             const breakpoint = sidekick.debugApi.get(tracePointId);
             wsClient.removeListener('message', wsClientMessageHandler);
@@ -237,6 +275,7 @@ describe('Tracepoint reqeust & response Test', function () {
             expect(message.erroneous).toBe(true);
             expect(message.errorCode).toBe(2000);
             expect(message.errorMessage).toBeTruthy();
+            sidekick.debugApi.delete(breakpoint);
             done();
         }
 
@@ -260,5 +299,39 @@ describe('Tracepoint reqeust & response Test', function () {
 
         wsClient.on('message', wsClientMessageHandler);
         wsClient.send(JSON.stringify(PutTracePointRequest));
+    });
+
+    it('Check Expired', (done) => {
+        const _putTracePointRequest = {
+            ...PutTracePointRequest,
+            expireCount: 1,
+        }
+
+        let hitCount = 0;
+        const wsClientMessageHandler = (data) => {
+            try {
+                const message = JSON.parse(data.toString());
+                if (message.name === 'PutTracePointResponse') {
+                    BreakpointMethod();
+                }
+                
+                if (message.name === 'TracePointSnapshotEvent') {
+                    hitCount += 1;
+                    BreakpointMethod();
+                    setTimeout(function() {
+                        if (hitCount == 1) {
+                            done();
+                        } else {
+                            done(new Error(`There is an error on expiration. hitCount: ${hitCount}`));
+                        }
+                    }, 2000);
+                }
+            } catch (error) {
+                done(error);
+            }
+        }
+        
+        wsClient.on('message', wsClientMessageHandler);
+        wsClient.send(JSON.stringify(_putTracePointRequest));
     });
 });

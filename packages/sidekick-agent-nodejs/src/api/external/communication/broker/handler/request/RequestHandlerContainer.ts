@@ -13,13 +13,24 @@ import DisableLogPointRequestHandler from "./logpoint/DisableLogPointRequestHand
 import RemoveLogPointRequestHandler from "./logpoint/RemoveLogPointRequestHandler";
 import RemoveBatchLogPointRequestHandler from "./logpoint/RemoveBatchLogPointRequestHandler";
 import UpdateLogPointRequestHandler from "./logpoint/UpdateLogPointRequestHandler";
+import EnableProbeTagRequestHandler from "./tag/EnableProbeTagRequestHandler";
+import DisableProbeTagRequestHandler from "./tag/DisableProbeTagRequestHandler";
+import UpdateConfigRequestHandler from "./config/UpdateConfigRequestHandler";
+import AttachRequestHandler from "./config/AttachRequestHandler";
+import DetachRequestHandler from "./config/DetachRequestHandler";
 import TracepointManager from "../../../../manager/TracepointManager";
 import LogpointManager from "../../../../manager/LogpointManager";
+import TagManager from "../../../../manager/TagManager";
+import ConfigManager from "../../../../manager/ConfigManager";
 
 export default class RequestHandlerContainer implements HandlerContainer {
     private requestHandlerMap: Map<RequestName, Handler>;
 
-    constructor(tracepointManager: TracepointManager, logpointManager: LogpointManager) {
+    constructor(
+        tracepointManager: TracepointManager,
+        logpointManager: LogpointManager,
+        tagManager: TagManager,
+        configManager: ConfigManager) {
         this.requestHandlerMap = new Map<RequestName, Handler>([
             ['PutTracePointRequest', new PutTracePointMessageHandler(tracepointManager)],
             ['EnableTracePointRequest', new EnableTracePointRequestHandler(tracepointManager)],
@@ -33,6 +44,11 @@ export default class RequestHandlerContainer implements HandlerContainer {
             ['RemoveLogPointRequest', new RemoveLogPointRequestHandler(logpointManager)],
             ['RemoveBatchLogPointRequest', new RemoveBatchLogPointRequestHandler(logpointManager)],
             ['UpdateLogPointRequest', new UpdateLogPointRequestHandler(logpointManager)],
+            ['EnableProbeTagRequest', new EnableProbeTagRequestHandler(tagManager)],
+            ['DisableProbeTagRequest', new DisableProbeTagRequestHandler(tagManager)],
+            ['UpdateConfigRequest', new UpdateConfigRequestHandler(configManager)],
+            ['AttachRequest', new AttachRequestHandler(configManager)],
+            ['DetachRequest', new DetachRequestHandler(configManager)],
         ]);
     }
 

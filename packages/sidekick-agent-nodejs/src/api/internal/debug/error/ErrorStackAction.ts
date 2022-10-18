@@ -1,5 +1,9 @@
 import * as inspector from 'inspector';
-import { CaptureFrame, ErrorStackSnapshotEvent, ProbeActions } from '../../../../types';
+import { 
+  CaptureFrame,
+  ErrorStackSnapshotEvent,
+  ProbeType
+} from '../../../../types';
 import ScriptStore from '../../../../store/script/ScriptStore';
 import V8InspectorApi from '../../v8/V8inspectorApi';
 import CaptureProbeAction from '../probe/CaptureProbeAction';
@@ -22,7 +26,7 @@ export default class ErrorStackAction extends CaptureProbeAction<ErrorStackConte
     this.captureFrame = ConfigProvider.get<boolean>(ConfigNames.errorCollection.captureFrame);
   }
 
-  getType(): ProbeActions {
+  getType(): ProbeType {
     return 'ErrorStack';
   }
 

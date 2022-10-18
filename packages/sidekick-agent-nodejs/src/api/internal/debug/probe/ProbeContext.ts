@@ -1,4 +1,8 @@
-import { Probe, ProbeActions, SourceLocation } from "../../../../types";
+import { 
+    Probe,
+    ProbeType,
+    SourceLocation,
+} from "../../../../types";
 import * as inspector from 'inspector';
 import ProbeUtils from '../../../../utils/ProbeUtils';
 
@@ -51,6 +55,7 @@ export default interface ProbeContext {
     getLineNo(): number;
     getCondition(): string;
     getProbe(): Probe;
+    getTags(): string[];
     getGeneratedPosition(): SourceLocation;
     getHitCount(): number;
     isExpired(): boolean;
@@ -66,6 +71,7 @@ export abstract class DefaultProbeContext implements ProbeContext {
     protected createdAt: number;
     protected hitCount: number;
     protected expiredAt: number;
+    protected expirable: boolean;
 
     constructor(
         v8BreakpointId: inspector.Debugger.BreakpointId,
@@ -83,6 +89,8 @@ export abstract class DefaultProbeContext implements ProbeContext {
         if (this.rawProbe.expireSecs) {
             this.expiredAt = this.createdAt + (this.rawProbe.expireSecs * 1000);
         }
+
+        this.expirable = !(this.rawProbe.tags && this.rawProbe.tags.length);
     }
 
     getV8BreakpointId(): string {
@@ -115,12 +123,14 @@ export abstract class DefaultProbeContext implements ProbeContext {
 
     isExpired(): boolean {
         let result = false;
-        if (this.rawProbe.expireCount) {
-            result = this.hitCount > this.rawProbe.expireCount
-        }
-
-        if (!result && this.expiredAt) {
-            result = new Date().getTime() >= this.expiredAt;
+        if (this.expirable) {
+            if (this.rawProbe.expireCount) {
+                result = this.hitCount > this.rawProbe.expireCount
+            }
+    
+            if (!result && this.expiredAt) {
+                result = new Date().getTime() >= this.expiredAt;
+            }
         }
 
         return result;
@@ -138,5 +148,9 @@ export abstract class DefaultProbeContext implements ProbeContext {
         return this.rawProbe;
     }
 
-    abstract getProbeAction(): ProbeActions;
+    getTags(): string[] {
+        return this.rawProbe.tags;
+    }
+
+    abstract getProbeAction(): ProbeType;
 }

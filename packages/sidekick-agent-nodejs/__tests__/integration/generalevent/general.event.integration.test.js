@@ -37,7 +37,8 @@ describe('General Event Test', function () {
 
         tracePointId = ProbeUtils.getProbeId({
             ...PutTracePointRequest,
-            id: PutTracePointRequest.tracePointId
+            id: PutTracePointRequest.tracePointId,
+            type: 'Tracepoint',
         });
     });
     

@@ -1,5 +1,10 @@
 import * as inspector from 'inspector';
-import { ProbeActions, TracePointSnapshotEvent, TracePointSnapshotFailedEvent, CaptureFrame } from '../../../../types';
+import { 
+  ProbeType,
+  TracePointSnapshotEvent,
+  TracePointSnapshotFailedEvent,
+  CaptureFrame 
+} from '../../../../types';
 import ScriptStore from '../../../../store/script/ScriptStore';
 import V8InspectorApi from '../../v8/V8inspectorApi';
 import CaptureProbeAction from '../probe/CaptureProbeAction';
@@ -20,7 +25,7 @@ export default class TracePointAction extends CaptureProbeAction<TracePointConte
     super(context, scriptStore, v8InspectorApi);
   }
 
-  getType(): ProbeActions {
+  getType(): ProbeType {
     return 'Tracepoint';
   }
 
@@ -47,7 +52,7 @@ export default class TracePointAction extends CaptureProbeAction<TracePointConte
 
         const convertedFrames = this.captureFrameConverter.convert(userFrames);
         const snapshotEvent = new TracePointSnapshotEvent(
-          this.context.rawProbe.id.replace(`${this.context.rawProbe.action}:`, ''),
+          this.context.rawProbe.id.replace(`${this.context.rawProbe.type}:`, ''),
           this.context.rawProbe.client,
           this.context.rawProbe.remoteFilename || this.context.rawProbe.fileName,
           convertedFrames && convertedFrames[0] ? convertedFrames[0].methodName : '',

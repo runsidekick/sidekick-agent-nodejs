@@ -17,7 +17,10 @@ export class TaskScheduler implements Scheduler {
     private tasks: { tickCount: number, task: Task }[] = [];
     private schedulerTickCount = 0;
     
-    constructor() {
+    constructor(tasks?: { period: number, task: Task }[]) {
+        (tasks || []).forEach(task => {
+            this.add(task.period, task.task);
+        });
     }
 
     start() {

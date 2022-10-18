@@ -25,7 +25,7 @@ export class DefaultLogpointManager implements LogpointManager {
         const logpoints: Logpoint[] = [];
 
         (probes || []).forEach(probe => {
-            if (probe.action == 'Logpoint') {
+            if (probe.type == 'Logpoint') {
                 const logpoint = {
                     id: probe.rawId,
                     fileName: probe.remoteFilename || probe.fileName,
@@ -61,9 +61,14 @@ export class DefaultLogpointManager implements LogpointManager {
                 rawId: logpoint.id,
                 fileName: ProbeUtils.extractFileName(logpoint.fileName),
                 remoteFilename: logpoint.fileName,
-                action: 'Logpoint',
+                type: 'Logpoint',
                 enabled: !logpoint.disable,
-                ...( logpoint.conditionExpression ? { condition: logpoint.conditionExpression }: undefined )
+                ...( logpoint.conditionExpression ? { condition: logpoint.conditionExpression }: undefined ),
+                actions: [
+                    'ConditionAwareProbeAction',
+                    'RateLimitedProbeAction',
+                    ...( !logpoint.tags ? ['ExpiringProbeAction'] : [] ),
+                ],
             } as Probe;
 
             ProbeUtils.fillProbeId(probe);
@@ -86,9 +91,14 @@ export class DefaultLogpointManager implements LogpointManager {
         const probe = {
             ...logpoint,
             rawId: logpoint.id,
-            action: 'Logpoint',
+            type: 'Logpoint',
             enabled: !logpoint.disable,
-            ...( logpoint.conditionExpression ? { condition: logpoint.conditionExpression }: undefined )
+            ...( logpoint.conditionExpression ? { condition: logpoint.conditionExpression }: undefined ),
+            actions: [
+                'ConditionAwareProbeAction',
+                'RateLimitedProbeAction',
+                ...( !logpoint.tags ? ['ExpiringProbeAction'] : [] ),
+            ],
         } as Probe;
 
         ProbeUtils.fillProbeId(probe);
@@ -113,7 +123,7 @@ export class DefaultLogpointManager implements LogpointManager {
             id,
             rawId: id,
             client,
-            action: 'Logpoint',
+            type: 'Logpoint',
         } as Probe;
 
         ProbeUtils.fillProbeId(probe);
@@ -136,7 +146,7 @@ export class DefaultLogpointManager implements LogpointManager {
             id,
             rawId: id,
             client,
-            action: 'Logpoint',
+            type: 'Logpoint',
         } as Probe;
 
         ProbeUtils.fillProbeId(probe);
@@ -159,7 +169,7 @@ export class DefaultLogpointManager implements LogpointManager {
             id,
             rawId: id,
             client,
-            action: 'Logpoint',
+            type: 'Logpoint',
         } as Probe
 
         ProbeUtils.fillProbeId(probe);

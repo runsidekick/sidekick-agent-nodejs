@@ -7,11 +7,12 @@ import Logger from '../../../../logger';
 import MustacheExpressionUtils from '../../../../utils/MustacheExpressionUtils';
 import {
   Probe,
-  ProbeActions,
+  ProbeType,
   LogPointEvent,
   LogPointFailedEvent,
   LogMessageDataReductionInfo,
-  CaptureFrame
+  CaptureFrame,
+  CaptureConfig
 } from '../../../../types';
 import CommunicationManager from '../../../external/communication/CommunicationManager';
 import UuidUtils from '../../../../utils/UuidUtils';
@@ -32,7 +33,6 @@ export default class LogPointAction extends CaptureProbeAction<LogPointContext> 
   ) {
     super(context, scriptStore, v8InspectorApi);
 
-    this.captureConfig.maxFrames = 1;
     this.logMessageDataReductionCallback = ConfigProvider.get<any>(ConfigNames.dataReduction.logMessage);
   }
 
@@ -116,7 +116,7 @@ export default class LogPointAction extends CaptureProbeAction<LogPointContext> 
     super.updateProbe(probe);
   }
 
-  getType(): ProbeActions {
+  getType(): ProbeType {
       return 'Logpoint';
   }
 
@@ -131,7 +131,7 @@ export default class LogPointAction extends CaptureProbeAction<LogPointContext> 
       } = this.context.getProbe();
   
       const logPointEvent = new LogPointEvent(
-        id.replace(`${this.context.rawProbe.action}:`, ''),
+        id.replace(`${this.context.rawProbe.type}:`, ''),
         client,
         remoteFilename || fileName,
         frame.methodName,
@@ -201,5 +201,12 @@ export default class LogPointAction extends CaptureProbeAction<LogPointContext> 
        */
         process.stdout.write(`\n ${logTime} [${logLevel.toLocaleUpperCase()}] ${logMessage} \n`);
     }
+  }
+
+  protected getCaptureConfig(): CaptureConfig {
+    return {
+      ...super.getCaptureConfig(),
+      maxFrames: 1,
+    } as CaptureConfig;
   }
 }

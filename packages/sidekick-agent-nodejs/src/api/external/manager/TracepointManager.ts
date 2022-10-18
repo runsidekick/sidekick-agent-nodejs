@@ -25,7 +25,7 @@ export class DefaultTracepointManager implements TracepointManager {
         const tracepoints: Tracepoint[] = [];
 
         (probes || []).forEach(probe => {
-            if (probe.action == 'Tracepoint') {
+            if (probe.type == 'Tracepoint') {
                 const tracepoint = {
                     id: probe.rawId,
                     fileName: probe.remoteFilename || probe.fileName,
@@ -59,10 +59,15 @@ export class DefaultTracepointManager implements TracepointManager {
                 rawId: tracepoint.id,
                 fileName: ProbeUtils.extractFileName(tracepoint.fileName),
                 remoteFilename: tracepoint.fileName,
-                action: 'Tracepoint',
+                type: 'Tracepoint',
                 enabled: !tracepoint.disable,
                 tracingEnabled: tracepoint.tracingEnabled,
-                ...( tracepoint.conditionExpression ? { condition: tracepoint.conditionExpression }: undefined )
+                ...( tracepoint.conditionExpression ? { condition: tracepoint.conditionExpression }: undefined ),
+                actions: [
+                    'ConditionAwareProbeAction',
+                    'RateLimitedProbeAction',
+                    ...( !tracepoint.tags ? ['ExpiringProbeAction'] : [] ),
+                ],
             } as Probe;
 
             ProbeUtils.fillProbeId(probe);
@@ -86,10 +91,15 @@ export class DefaultTracepointManager implements TracepointManager {
         const probe = {
             ...tracepoint,
             rawId: tracepoint.id,
-            action: 'Tracepoint',
+            type: 'Tracepoint',
             enabled: !tracepoint.disable,
             tracingEnabled: tracepoint.tracingEnabled,
-            ...( tracepoint.conditionExpression ? { condition: tracepoint.conditionExpression }: undefined )
+            ...( tracepoint.conditionExpression ? { condition: tracepoint.conditionExpression }: undefined ),
+            actions: [
+                'ConditionAwareProbeAction',
+                'RateLimitedProbeAction',
+                ...( !tracepoint.tags ? ['ExpiringProbeAction'] : [] ),
+            ],
         } as Probe;
 
         ProbeUtils.fillProbeId(probe);
@@ -115,7 +125,7 @@ export class DefaultTracepointManager implements TracepointManager {
             id,
             rawId: id,
             client,
-            action: 'Tracepoint',
+            type: 'Tracepoint',
         } as Probe;
 
         ProbeUtils.fillProbeId(probe);
@@ -139,7 +149,7 @@ export class DefaultTracepointManager implements TracepointManager {
             id,
             rawId: id,
             client,
-            action: 'Tracepoint',
+            type: 'Tracepoint',
         } as Probe;
 
         ProbeUtils.fillProbeId(probe);
@@ -163,7 +173,7 @@ export class DefaultTracepointManager implements TracepointManager {
             id,
             rawId: id,
             client,
-            action: 'Tracepoint',
+            type: 'Tracepoint',
         } as Probe
 
         ProbeUtils.fillProbeId(probe);

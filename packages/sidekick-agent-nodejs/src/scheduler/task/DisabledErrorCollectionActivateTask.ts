@@ -1,3 +1,5 @@
+import { ConfigNames } from "../../config/ConfigNames";
+import ConfigProvider from "../../config/ConfigProvider";
 import DebugApi from "../../api/internal/debug/DebugApi";
 import Task from "./Task";
 
@@ -9,6 +11,9 @@ export default class DisabledErrorCollectionActivateTask implements Task {
     }
 
     execute() {
-        this.debugApi.enableErrorCollect();
+        if (!ConfigProvider.get<boolean>(ConfigNames.agent.silent) &&
+            ConfigProvider.get<boolean>(ConfigNames.errorCollection.enable)) {
+            this.debugApi.enableErrorCollect();
+        }
     }
 }

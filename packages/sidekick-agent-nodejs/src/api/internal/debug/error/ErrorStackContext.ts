@@ -1,5 +1,8 @@
 import * as inspector from 'inspector';
-import { Probe, ProbeActions } from "../../../../types";
+import { 
+    Probe,
+    ProbeType
+} from "../../../../types";
 import { DefaultProbeContext } from "../probe/ProbeContext";
 
 export default class ErrorPointContext extends DefaultProbeContext {
@@ -10,7 +13,7 @@ export default class ErrorPointContext extends DefaultProbeContext {
         super(v8BreakpointId, rawProbe);
     }
 
-    getProbeAction(): ProbeActions {
+    getProbeAction(): ProbeType {
         return 'ErrorStack';
     }
 }

@@ -1,7 +1,7 @@
 import * as inspector from 'inspector';
 import { 
     Probe,
-    ProbeActions
+    ProbeType
 } from '../../../../types';
 import ProbeContext from "./ProbeContext";
 import ScriptStore from "../../../../store/script/ScriptStore";
@@ -13,7 +13,7 @@ export default interface ProbeAction<C extends ProbeContext> {
     getLocationId(): string;
     getProbe(): Probe;
     updateProbe(probe: Probe): void;
-    getType(): ProbeActions;
+    getType(): ProbeType;
     getClient(): string;
     getContext(): C;
     enable(): void;
@@ -101,7 +101,7 @@ export abstract class DefaultProbeAction<C extends ProbeContext> implements Prob
     }
 
     abstract onProbe(message: inspector.InspectorNotification<inspector.Debugger.PausedEventDataType>): void;
-    abstract getType(): ProbeActions;
+    abstract getType(): ProbeType;
 }
 
 export abstract class DelegatedProbeAction<C extends ProbeContext> implements ProbeAction<C> {
@@ -131,7 +131,7 @@ export abstract class DelegatedProbeAction<C extends ProbeContext> implements Pr
         this.action.updateProbe(probe);
     }
 
-    getType(): ProbeActions {
+    getType(): ProbeType {
         return this.action.getType(); 
     }
 
