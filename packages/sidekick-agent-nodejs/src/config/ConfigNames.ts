@@ -65,7 +65,7 @@ export const ConfigNames = {
     }
 };
 
-export const SidekickConfigNames: { [key: string]: string } = {
+export const EditableConfigNames: { [key: string]: string } = {
     silent: ConfigNames.agent.silent,
     maxFrames: ConfigNames.capture.maxFrames,
     maxExpandFrames: ConfigNames.capture.maxExpandFrames,

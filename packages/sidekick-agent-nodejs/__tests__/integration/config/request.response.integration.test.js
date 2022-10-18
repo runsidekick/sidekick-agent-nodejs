@@ -26,6 +26,8 @@ const {
     CallerBreakpointMethod,
 } = require('../../config/data/requestresponse/breakpoint-method');
 
+const { ErrorMethod } = require('../../config/data/requestresponse/error-method');
+
 const ConfigProvider = require('../../../dist/config/ConfigProvider').default;
 const { ConfigNames } = require('../../../dist/config/ConfigNames');
 
@@ -360,6 +362,129 @@ describe('Config Change Test', function () {
                     maxProperties: 10,
                     maxParseDepth: maxParseDepthValue,
                 }
+            }
+        }
+
+        wsClient.on('message', wsClientMessageHandler);
+        wsClient.send(JSON.stringify(_UpdateConfigRequest));
+    });
+
+    it('Check Update Error Collection Enable & Disable', (done) => {
+        const errorCollectionEnableValue = true;
+        const _UpdateConfigRequest = {
+            ...UpdateConfigRequest,
+            ...{
+                config: {
+                    maxFrames: 1,
+                    maxProperties: 10,
+                    errorCollectionEnable: errorCollectionEnableValue,
+                }
+            }
+        }
+
+        const validateErrorEvent = (message) => {
+            const errorCollectionEnable = ConfigProvider.get(ConfigNames.errorCollection.enable);
+            expect(errorCollectionEnable).toBe(true);
+            expect(message.error).toBeTruthy();
+            expect(message.error.message).toBe('Error: Error from test.');
+            expect(message.frames).toBeUndefined();
+            _UpdateConfigRequest.config.errorCollectionEnable = false;
+            wsClient.send(JSON.stringify(_UpdateConfigRequest)); 
+        }
+   
+        let flagConfig = 0;
+        let errorConfig = 0;
+        const wsClientMessageHandler = (data) => {
+            try {
+                const message = JSON.parse(data.toString());
+                if (message.name === 'UpdateConfigResponse') {
+                    if (flagConfig == 0) {
+                        setTimeout(() => {
+                            try {
+                                ErrorMethod();
+                            } catch (error) { }
+                        }, 1000)
+                    } else if (flagConfig == 1) {
+                        setTimeout(() => {
+                            try {
+                                ErrorMethod();
+                            } catch (error) { }
+
+                            setTimeout(() => {
+                                if (errorConfig == 1) {
+                                    wsClient.removeListener('message', wsClientMessageHandler);
+                                    done();  
+                                } else {
+                                    done(new Error('There is an error about enable disable error collection.'));
+                                }
+                            }, 1000)
+                        }, 1000)
+                    } else {
+                        done(new Error('There is an error about update config.'));
+                    }
+
+                    flagConfig += 1; 
+                }
+
+                if (message.name === 'ErrorStackSnapshotEvent') {
+                    validateErrorEvent(message);
+                    errorConfig += 1;
+                }
+            } catch (error) {
+                done(error);
+            }
+        }
+
+        wsClient.on('message', wsClientMessageHandler);
+        wsClient.send(JSON.stringify(_UpdateConfigRequest));
+    });
+
+    it('Check Update Error Collection Frame', (done) => {
+        const errorCollectionEnableValue = true;
+        const errorCollectionEnableCaptureFrameValue = true
+        const _UpdateConfigRequest = {
+            ...UpdateConfigRequest,
+            ...{
+                config: {
+                    maxFrames: 1,
+                    maxProperties: 10,
+                    maxParseDepth: 3,
+                    errorCollectionEnable: errorCollectionEnableValue,
+                    errorCollectionEnableCaptureFrame: errorCollectionEnableCaptureFrameValue
+                }
+            }
+        }
+
+        const validateErrorEvent = (message) => {
+            wsClient.removeListener('message', wsClientMessageHandler);
+            const errorCollectionEnable = ConfigProvider.get(ConfigNames.errorCollection.enable);
+            expect(errorCollectionEnable).toBe(true);
+            const errorCollectionEnableCaptureFrame = ConfigProvider.get(ConfigNames.errorCollection.captureFrame);
+            expect(errorCollectionEnableCaptureFrame).toBe(true);
+            expect(message.error).toBeTruthy();
+            expect(message.error.message).toBe('Error: Error from test.');
+            expect(message.frames).toBeTruthy();
+            expect(message.frames[0].variables.param['@value'].field1).toBeTruthy();
+            expect(message.frames[0].variables.param['@value'].field1['@value']).toBe('value1');
+            done(); 
+        }
+   
+        const wsClientMessageHandler = (data) => {
+            try {
+                const message = JSON.parse(data.toString());
+                if (message.name === 'UpdateConfigResponse') {
+                    setTimeout(() => {
+                        try {
+                            ErrorMethod({ field1: 'value1' });
+                        } catch (error) { }
+                    }, 1000)
+                }
+
+                if (message.name === 'ErrorStackSnapshotEvent') {
+                    validateErrorEvent(message);
+                }
+            } catch (error) {
+                done(error);
             }
         }
 

@@ -5,7 +5,7 @@ import {
     BaseConfigMetaData,
     ConfigProviderModel
 } from "../types";
-import { SidekickConfigNames } from './ConfigNames';
+import { EditableConfigNames } from './ConfigNames';
 
 export default class ConfigProvider {
 
@@ -98,7 +98,7 @@ export default class ConfigProvider {
         let changed = false;
         let change: { [key: string]: any} = {}
         Object.keys(candidateConfig || {}).forEach(key => {
-            const environmentKey = SidekickConfigNames[key];
+            const environmentKey = EditableConfigNames[key];
             if (environmentKey) {
                 const key = ConfigProvider.configMetadata[environmentKey] 
                     ? ConfigProvider.configMetadata[environmentKey].key

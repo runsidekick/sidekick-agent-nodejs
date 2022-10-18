@@ -10,6 +10,7 @@ import ApiStatusListener from '../listener/apistatus/ApiStatusListener';
 import Scheduler, { TaskScheduler } from '../scheduler/Scheduler';
 import ExpiredProbeCleanTask from '../scheduler/task/ExpiredProbeCleanTask';
 import SendStatusTask from '../scheduler/task/SendStatusTask';
+import GetConfigTask from '../scheduler/task/GetConfigTask';
 import ProbeStore from '../store/probe/ProbeStore';
 import ConfigProvider from '../config/ConfigProvider';
 import { ConfigNames } from '../config/ConfigNames';
@@ -134,6 +135,7 @@ export default class SidekickManager {
             { period: 30, task: new ExpiredProbeCleanTask(probeStore) },
             { period: 60, task: new SendStatusTask() },
             { period: 30, task: new DisabledErrorCollectionActivateTask(this.debugApi) },
+            { period: 300, task: new GetConfigTask() },
         ]);
 
         this.scheduler.start();

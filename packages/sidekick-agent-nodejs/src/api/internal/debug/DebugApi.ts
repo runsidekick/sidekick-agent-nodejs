@@ -268,7 +268,9 @@ export class DefaultDebugApi extends EventEmitter implements DebugApi {
     }
 
     enableErrorCollect(): void {
-        if (!ConfigProvider.get<boolean>(ConfigNames.errorCollection.enable) || !this.session) {
+        if (!ConfigProvider.get<boolean>(ConfigNames.errorCollection.enable) 
+            || !this.errorCollectionInitiated
+            || !this.session) {
             return;
         }
 
@@ -294,20 +296,20 @@ export class DefaultDebugApi extends EventEmitter implements DebugApi {
             return;
         }
 
+        this.errorCollectionInitiated = true;
         this.enableErrorCollect();
         if (!this.errorStackRateLimiter) {
             this.errorStackRateLimiter = new DefaultRateLimiter(
                 ConfigProvider.get<number>(ConfigNames.errorCollection.rateLimit.totalInMinute));
         }
 
-        this.errorCollectionInitiated = true;
         Logger.debug('<DefaultDebugApi> Error collection initiated.');
     }
 
     deactivateErrorCollection() : void {
+        this.errorCollectionInitiated = false;
         this.errorStackRateLimiter = null;
         this.disableErrorCollect();
-        this.errorCollectionInitiated = false;
     }
 
     private fillConfig(): void {

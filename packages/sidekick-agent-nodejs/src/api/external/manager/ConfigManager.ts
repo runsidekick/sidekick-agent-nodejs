@@ -1,6 +1,5 @@
 import DebugApi from "src/api/internal/debug/DebugApi";
 import ConfigProvider from "../../../config/ConfigProvider";
-import { ConfigNames } from '../../../config/ConfigNames';
 import CommunicationManager from "../communication/CommunicationManager";
 import CommunicationUtils from "../../../utils/CommunicationUtils";
 
@@ -32,9 +31,9 @@ export class DefaultConfigManager implements ConfigManager {
     
     updateConfig(candidateConfig: { [key: string]: any }) {
         ConfigProvider.update(candidateConfig);
-        const errorCollector = candidateConfig[ConfigNames.errorCollection.enable];
-        if (errorCollector != null) {
-            errorCollector ? this.debugApi.activateErrorCollection() : this.debugApi.deactivateErrorCollection();
+        const errorCollectionEnable = candidateConfig.errorCollectionEnable;
+        if (errorCollectionEnable != undefined) {
+            errorCollectionEnable ? this.debugApi.activateErrorCollection() : this.debugApi.deactivateErrorCollection();
         }
     }
 }
