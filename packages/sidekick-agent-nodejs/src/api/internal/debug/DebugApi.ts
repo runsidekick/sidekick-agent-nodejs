@@ -401,7 +401,7 @@ export class DefaultDebugApi extends EventEmitter implements DebugApi {
                 this.cleanupAsyncCallStackIntervalRef = setInterval(() => {
                   try {
                     this.session.post('Debugger.setAsyncCallStackDepth', { maxDepth: 0 });
-                    this.session.post('Debugger.setAsyncCallStackDepth', {  maxDepth: 1 });
+                    this.session.post('Debugger.setAsyncCallStackDepth', { maxDepth: 1 });
                   } catch (err) {
                     Logger.debug(`<DefaultDebugApi> An error occured while cleanupAsyncCallStack error: ${err}`);
                   }
