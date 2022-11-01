@@ -29,6 +29,7 @@ export default interface DebugApi extends ConnectableApi {
     get(probeId: string): Probe;
     getAll(): Probe[];
     getByLocationId(locationId: string): Set<string>;
+    getByTag(tag: string): Set<string>;
     add(probe: Probe): void;
     update(probe: Probe): void;
     delete(probe: Probe): void;
@@ -36,6 +37,8 @@ export default interface DebugApi extends ConnectableApi {
     disable(probe: Probe): void;
     enableErrorCollect(): void;
     disableErrorCollect(): void;
+    activateErrorCollection(): void;
+    deactivateErrorCollection(): void;
 }
 
 export class DefaultDebugApi extends EventEmitter implements DebugApi {
@@ -55,8 +58,7 @@ export class DefaultDebugApi extends EventEmitter implements DebugApi {
     protected cleanupAsyncCallStackIntervalRef: any;
     protected hashCheckEnable: boolean;
     protected connected = false;
-    protected errorColletionEnable: boolean;
-    protected errorCollectionRateLimitTotalInMinute: number;
+    protected errorCollectionInitiated: boolean;
     protected errorStackRateLimiter: RateLimiter;
     
     constructor(probeStore?: ProbeStore, scriptStore?: ScriptStore) {
@@ -65,20 +67,12 @@ export class DefaultDebugApi extends EventEmitter implements DebugApi {
         this.probeStore = probeStore || new ProbeStore();
         this.scriptStore = scriptStore || new ScriptStore();
         this.paused = false;
-        this.enableAsyncCallStack = ConfigProvider.get<boolean>(ConfigNames.debugApi.enableAsyncCallStack);
-        this.cleanupAsyncCallStackInterval = ConfigProvider.get<number>(ConfigNames.debugApi.cleanupAsyncCallStackInterval);
-        this.resetV8Debugger = ConfigProvider.get<boolean>(ConfigNames.debugApi.resetV8Debugger);
-        this.resetV8DebuggerThreshold = ConfigProvider.get<number>(ConfigNames.debugApi.resetV8DebuggerThreshold);
-        this.hashCheckEnable = ConfigProvider.get<boolean>(ConfigNames.scriptStore.hashCheckEnable);
-        this.cleanEveryXCalls = this.resetV8DebuggerThreshold;
-        this.errorColletionEnable = ConfigProvider.get<boolean>(ConfigNames.errorCollection.enable);
-        this.errorCollectionRateLimitTotalInMinute =
-            ConfigProvider.get<number>(ConfigNames.errorCollection.rateLimit.totalInMinute);
+        this.fillConfig();
     }
     
     connect(reload?: boolean): void {
         this.tryConnect(reload);
-        this.initiateErrorCollection();
+        this.activateErrorCollection();
     }
 
     reconnect(): void {
@@ -90,7 +84,7 @@ export class DefaultDebugApi extends EventEmitter implements DebugApi {
         this.connected = false;
         if (this.session) {
             try {
-                this.disableErrorCollect();
+                this.deactivateErrorCollection();
                 this.clearCleanupAsyncCallStackIntervalRef();
                 this.clearAllBreakpoints(!reload);
                 this.session.post('Debugger.setBreakpointsActive', { active: false });
@@ -114,6 +108,10 @@ export class DefaultDebugApi extends EventEmitter implements DebugApi {
 
     getByLocationId(locationId: string): Set<string> {
         return this.probeStore.getProbeIdsByLocationId(locationId);
+    }
+
+    getByTag(tag: string): Set<string> {
+        return this.probeStore.getProbeByTag(tag);
     }
 
     add(probe: Probe): void {
@@ -270,7 +268,9 @@ export class DefaultDebugApi extends EventEmitter implements DebugApi {
     }
 
     enableErrorCollect(): void {
-        if (!this.errorColletionEnable || !this.session) {
+        if (!ConfigProvider.get<boolean>(ConfigNames.errorCollection.enable) 
+            || !this.errorCollectionInitiated
+            || !this.session) {
             return;
         }
 
@@ -291,17 +291,34 @@ export class DefaultDebugApi extends EventEmitter implements DebugApi {
         Logger.debug('<DefaultDebugApi> Error collection disabled.');
     }
 
-    private initiateErrorCollection(): void {
-        if (!this.errorColletionEnable) {
+    activateErrorCollection(): void {
+        if (!ConfigProvider.get<boolean>(ConfigNames.errorCollection.enable)) {
             return;
         }
 
+        this.errorCollectionInitiated = true;
         this.enableErrorCollect();
         if (!this.errorStackRateLimiter) {
-            this.errorStackRateLimiter = new DefaultRateLimiter(this.errorCollectionRateLimitTotalInMinute);
+            this.errorStackRateLimiter = new DefaultRateLimiter(
+                ConfigProvider.get<number>(ConfigNames.errorCollection.rateLimit.totalInMinute));
         }
 
         Logger.debug('<DefaultDebugApi> Error collection initiated.');
+    }
+
+    deactivateErrorCollection() : void {
+        this.errorCollectionInitiated = false;
+        this.errorStackRateLimiter = null;
+        this.disableErrorCollect();
+    }
+
+    private fillConfig(): void {
+        this.enableAsyncCallStack = ConfigProvider.get<boolean>(ConfigNames.debugApi.enableAsyncCallStack);
+        this.cleanupAsyncCallStackInterval = ConfigProvider.get<number>(ConfigNames.debugApi.cleanupAsyncCallStackInterval);
+        this.resetV8Debugger = ConfigProvider.get<boolean>(ConfigNames.debugApi.resetV8Debugger);
+        this.resetV8DebuggerThreshold = ConfigProvider.get<number>(ConfigNames.debugApi.resetV8DebuggerThreshold);
+        this.hashCheckEnable = ConfigProvider.get<boolean>(ConfigNames.scriptStore.hashCheckEnable);
+        this.cleanEveryXCalls = this.resetV8DebuggerThreshold;
     }
 
     private appendErrorProbe() {
@@ -312,7 +329,7 @@ export class DefaultDebugApi extends EventEmitter implements DebugApi {
         this.probeStore.set(
             ERROR_PROBE_STORE_ID, 
             ProbeActionFactory.getAction(
-                { probe: { id: ERROR_PROBE_STORE_ID, action: 'ErrorStack' } } as ProbeInfo,
+                { probe: { id: ERROR_PROBE_STORE_ID, type: 'ErrorStack', actions: ['ErrorRateLimitedProbeAction'] } } as ProbeInfo,
                 this.scriptStore,
                 this.v8InspectorApi,
             ));
@@ -384,7 +401,7 @@ export class DefaultDebugApi extends EventEmitter implements DebugApi {
                 this.cleanupAsyncCallStackIntervalRef = setInterval(() => {
                   try {
                     this.session.post('Debugger.setAsyncCallStackDepth', { maxDepth: 0 });
-                    this.session.post('Debugger.setAsyncCallStackDepth', {  maxDepth: 1 });
+                    this.session.post('Debugger.setAsyncCallStackDepth', { maxDepth: 1 });
                   } catch (err) {
                     Logger.debug(`<DefaultDebugApi> An error occured while cleanupAsyncCallStack error: ${err}`);
                   }

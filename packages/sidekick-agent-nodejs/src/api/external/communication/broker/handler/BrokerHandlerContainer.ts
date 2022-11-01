@@ -6,14 +6,20 @@ import HandlerContainer from "../../../../../handler/HandlerContainer";
 import ResponseHandlerContainer from "./response/ResponseHandlerContainer";
 import TracepointManager from "../../../manager/TracepointManager";
 import LogpointManager from "../../../manager/LogpointManager";
+import TagManager from "../../../manager/TagManager";
+import ConfigManager from "../../../manager/ConfigManager";
 
 export default class BrokerHandlerContainer implements HandlerContainer {
     private handlerMap: Map<CommunicationApiDataType, HandlerContainer>
 
-    constructor(tracepointManager: TracepointManager, logpointManager: LogpointManager) {
+    constructor(
+        tracepointManager: TracepointManager,
+        logpointManager: LogpointManager,
+        tagManager: TagManager,
+        configManager: ConfigManager) {
         this.handlerMap = new Map<CommunicationApiDataType, HandlerContainer>([
-            ['Request', new RequestHandlerContainer(tracepointManager, logpointManager)],
-            ['Response', new ResponseHandlerContainer(tracepointManager, logpointManager)],
+            ['Request', new RequestHandlerContainer(tracepointManager, logpointManager, tagManager, configManager)],
+            ['Response', new ResponseHandlerContainer(tracepointManager, logpointManager, configManager)],
             ['Event', new EventHandlerContainer()],
         ]);
     }

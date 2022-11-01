@@ -10,6 +10,7 @@ import ApiStatusListener from '../listener/apistatus/ApiStatusListener';
 import Scheduler, { TaskScheduler } from '../scheduler/Scheduler';
 import ExpiredProbeCleanTask from '../scheduler/task/ExpiredProbeCleanTask';
 import SendStatusTask from '../scheduler/task/SendStatusTask';
+import GetConfigTask from '../scheduler/task/GetConfigTask';
 import ProbeStore from '../store/probe/ProbeStore';
 import ConfigProvider from '../config/ConfigProvider';
 import { ConfigNames } from '../config/ConfigNames';
@@ -17,10 +18,12 @@ import { DefaultBufferedCommunicationApi } from '../api/external/communication/B
 import Logger from '../logger';
 import { DefaultTracepointManager } from '../api/external/manager/TracepointManager';
 import { DefaultLogpointManager } from '../api/external/manager/LogpointManager';
+import { DefaultTagManager } from '../api/external/manager/TagManager';
+import { DefaultConfigManager } from '../api/external/manager/ConfigManager';
 import ApplicationStatusTracePointProvider from '../application/status/tracepoint/ApplicationStatusTracePointProvider';
 import ApplicationStatusLogPointProvider from '../application/status/logpoint/ApplicationStatusLogPointProvider';
 import CommunicationManager from '../api/external/communication/CommunicationManager';
-import DisabledErrorCollectionActivateTask from '../scheduler/task/DisabledErrorCollectionActivateTask';
+import DisabledErrorCollectionEnableTask from '../scheduler/task/DisabledErrorCollectionEnableTask';
 
 export default class SidekickManager {
     private debugApi: DebugApi;
@@ -67,12 +70,15 @@ export default class SidekickManager {
 
                 const tracepointManager = new DefaultTracepointManager(self.debugApi);
                 const logpointManager = new DefaultLogpointManager(self.debugApi);
+                const tagManager = new DefaultTagManager(self.debugApi);
+                const configManager = new DefaultConfigManager(self.debugApi);
                 CommunicationManager.setProviderList([
                     new ApplicationStatusTracePointProvider(tracepointManager),
                     new ApplicationStatusLogPointProvider(logpointManager)
                 ]);
 
-                const brokerHandlerContainer = new BrokerHandlerContainer(tracepointManager, logpointManager);
+                const brokerHandlerContainer = new BrokerHandlerContainer(
+                    tracepointManager, logpointManager, tagManager, configManager);
                 self.debugApiListener = new DebugApiListener(
                     self.debugApi,
                     agentStatus,
@@ -125,12 +131,12 @@ export default class SidekickManager {
     private initiateSchedular(probeStore: ProbeStore) {
         Logger.debug('<SidekickManager> Initiate schedular working ...');
 
-        this.scheduler = new TaskScheduler();
-        this.scheduler.add(30, new ExpiredProbeCleanTask(probeStore));
-        this.scheduler.add(60, new SendStatusTask());
-        if (ConfigProvider.get<boolean>(ConfigNames.errorCollection.enable)) {
-            this.scheduler.add(30, new DisabledErrorCollectionActivateTask(this.debugApi));
-        }
+        this.scheduler = new TaskScheduler([
+            { period: 30, task: new ExpiredProbeCleanTask(probeStore) },
+            { period: 60, task: new SendStatusTask() },
+            { period: 30, task: new DisabledErrorCollectionEnableTask(this.debugApi) },
+            { period: 300, task: new GetConfigTask() },
+        ]);
 
         this.scheduler.start();
     }

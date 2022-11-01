@@ -1,5 +1,9 @@
 import * as inspector from 'inspector';
-import { Probe, ProbeActions, SourceLocation } from "../../../../types";
+import { 
+    Probe,
+    ProbeType,
+    SourceLocation 
+} from "../../../../types";
 import { DefaultProbeContext } from "../probe/ProbeContext";
 
 export default class TracePointContext extends DefaultProbeContext {
@@ -11,7 +15,7 @@ export default class TracePointContext extends DefaultProbeContext {
         super(v8BreakpointId, rawProbe, generatedPosition);
     }
 
-    getProbeAction(): ProbeActions {
+    getProbeAction(): ProbeType {
         return 'Tracepoint';
     }
 }

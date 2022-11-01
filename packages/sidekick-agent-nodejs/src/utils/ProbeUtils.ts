@@ -17,7 +17,7 @@ const AstValidator = require('./AstValidator').default;
 
 export default class ProbeUtils {
     static getProbeId(probe: Probe) {
-        return `${probe.action}:${probe.id}`;
+        return `${probe.type}:${probe.id}`;
     }
 
     static extractFileNameFrom(filename: string, extractText: string) {

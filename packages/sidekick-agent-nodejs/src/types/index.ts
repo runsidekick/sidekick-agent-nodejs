@@ -15,13 +15,15 @@ export type BaseConfig = {
 
 export type BaseConfigMetaData<T extends BaseConfig> = {
   [key: string]: {
-      key: keyof T,
-      type: ConfigSchemaTypes,
-      required?: boolean,
-      canEnv?: boolean,
-      default?: any,
-      flag?: string,
-      description?: string,
+    key: keyof T,
+    type: ConfigSchemaTypes,
+    required?: boolean,
+    canEnv?: boolean,
+    default?: any,
+    flag?: string,
+    description?: string,
+    get?: (value: any) => any,
+    validator?: (value: any) => boolean,
   };
 }
 
@@ -34,17 +36,24 @@ export class InternalMessage extends Message {
   data: any;
 }
 
-export type ProbeActions = 
+export type ProbeType = 
 | 'Tracepoint'
 | 'Logpoint'
 | 'ErrorStack';
+
+export type ProbeActionType = 
+| 'ConditionAwareProbeAction'
+| 'RateLimitedProbeAction'
+| 'ErrorRateLimitedProbeAction'
+| 'ExpiringProbeAction';
 
 export type Probe = {
   id: string;
   rawId: string,
   fileName: string;
   lineNo: number;
-  action: ProbeActions;
+  type: ProbeType;
+  actions: ProbeActionType[],
   remoteFilename?: string;
   client?: string;
   condition?: string;
@@ -56,7 +65,8 @@ export type Probe = {
   fileHash?: string;
   logExpression?: string;
   logLevel?: string;
-  stdoutEnabled?: boolean;
+  stdoutEnabled?: boolean
+  tags?: string[];
 }
 
 export type ProbeInfo = {
@@ -75,6 +85,7 @@ export type BasePointItem = {
   expireCount?: number;
   disable?: boolean;
   fileHash?: string;
+  tags?: string[],
 }
 
 export type Tracepoint = BasePointItem & {
@@ -104,7 +115,7 @@ export type TracePointRequestName =
 | 'RemoveBatchTracePointRequest' 
 | 'RemoveTracePointRequest' 
 | 'UpdateTracePointRequest'
-| 'FilterTracePointsRequest';
+| 'FilterTracePointsRequest'
 
 export type LogPointRequestName =
 | 'PutLogPointRequest' 
@@ -115,7 +126,28 @@ export type LogPointRequestName =
 | 'UpdateLogPointRequest'
 | 'FilterLogPointsRequest';
 
-export type RequestName = TracePointRequestName | LogPointRequestName;
+export type TagRequestName = 
+| 'EnableProbeTagRequest'
+| 'DisableProbeTagRequest';
+
+export type SilentRequestName = 
+| 'AttachRequest'
+| 'DetachRequest';
+
+export type ConfigRequestName = 
+| SilentRequestName 
+| 'GetConfigRequest'
+| 'UpdateConfigRequest';
+
+export const SilentModeAcceptedRequestName: SilentRequestName[] = [
+  'AttachRequest',
+]
+
+export type RequestName = 
+| TracePointRequestName 
+| LogPointRequestName 
+| TagRequestName
+| ConfigRequestName;
 
 export class BrokerRequest extends CommunicationApiData {
   id: string;
@@ -274,6 +306,33 @@ export type DisableLogPointRequest = BrokerRequest & {
   lineNo: number;
 }
 
+export type EnableProbeTagRequest = BrokerRequest & { 
+  tag: string;
+}
+
+export type DisableProbeTagRequest = BrokerRequest & { 
+  tag: string;
+}
+
+export class GetConfigRequest extends BrokerRequest {
+  constructor(
+    id: string,
+    client?: string) {
+    super(id, client);
+    this.setName('GetConfigRequest');
+  }
+}
+
+export type UpdateConfigRequest = BrokerRequest & { 
+  config: { [key: string]: any }
+}
+
+export type AttachRequest = BrokerRequest & { 
+}
+
+export type DetachRequest = BrokerRequest & { 
+}
+
 export type TracePointResponseName =
 | 'FilterTracePointsResponse'
 | 'PutTracePointResponse'
@@ -292,7 +351,21 @@ export type LogPointResponseName =
 | 'EnableLogPointResponse'
 | 'DisableLogPointResponse';
 
-export type ResponseName = TracePointResponseName | LogPointResponseName;
+export type TagResponseName = 
+| 'EnableProbeTagResponse'
+| 'DisableProbeTagResponse';
+
+export type ConfigResponseName = 
+| 'GetConfigResponse'
+| 'UpdateConfigResponse'
+| 'AttachResponse'
+| 'DetachResponse';
+
+export type ResponseName =
+| TracePointResponseName 
+| LogPointResponseName 
+| TagResponseName
+| ConfigResponseName;
 
 export class BrokerResponse extends CommunicationApiData {
   name: ResponseName;
@@ -345,19 +418,19 @@ export class FilterTracePointsResponse  extends BrokerResponse  {
 }
 
 export class PutTracePointResponse extends BrokerResponse {
-  constructor(requestId:string, client: string){
+  constructor(requestId: string, client: string){
     super('PutTracePointResponse', requestId, client);
   }
 }
 
 export class UpdateTracePointResponse extends BrokerResponse {
-  constructor(requestId:string, client: string){
+  constructor(requestId: string, client: string){
     super('UpdateTracePointResponse', requestId, client);
   }
 }
 
 export class RemoveTracePointResponse extends BrokerResponse {
-  constructor(requestId:string, client: string){
+  constructor(requestId: string, client: string){
     super('RemoveTracePointResponse', requestId, client);
   }
 }
@@ -366,7 +439,7 @@ export class RemoveBatchTracePointResponse extends BrokerResponse {
   removedTracePointIds: string[];
   unRemovedTracePointIds: { [key:string]: string };
 
-  constructor(requestId:string, client: string){
+  constructor(requestId: string, client: string){
     super('RemoveBatchTracePointResponse', requestId, client);
 
     this.removedTracePointIds = [];
@@ -375,13 +448,13 @@ export class RemoveBatchTracePointResponse extends BrokerResponse {
 }
 
 export class EnableTracePointResponse extends BrokerResponse {
-  constructor(requestId:string, client: string){
+  constructor(requestId: string, client: string){
     super('EnableTracePointResponse', requestId, client);
   }
 }
 
 export class DisableTracePointResponse extends BrokerResponse {
-  constructor(requestId:string, client: string){
+  constructor(requestId: string, client: string){
     super('DisableTracePointResponse', requestId, client);
   }
 }
@@ -397,19 +470,19 @@ export class FilterLogPointsResponse  extends BrokerResponse  {
 }
 
 export class PutLogPointResponse extends BrokerResponse {
-  constructor(requestId:string, client: string){
+  constructor(requestId: string, client: string){
     super('PutLogPointResponse', requestId, client);
   }
 }
 
 export class UpdateLogPointResponse extends BrokerResponse {
-  constructor(requestId:string, client: string){
+  constructor(requestId: string, client: string){
     super('UpdateLogPointResponse', requestId, client);
   }
 }
 
 export class RemoveLogPointResponse extends BrokerResponse {
-  constructor(requestId:string, client: string){
+  constructor(requestId: string, client: string){
     super('RemoveLogPointResponse', requestId, client);
   }
 }
@@ -418,7 +491,7 @@ export class RemoveBatchLogPointResponse extends BrokerResponse {
   removedLogPointIds: string[];
   unRemovedLogPointIds: { [key:string]: string };
 
-  constructor(requestId:string, client: string){
+  constructor(requestId: string, client: string){
     super('RemoveBatchLogPointResponse', requestId, client);
 
     this.removedLogPointIds = [];
@@ -427,14 +500,52 @@ export class RemoveBatchLogPointResponse extends BrokerResponse {
 }
 
 export class EnableLogPointResponse extends BrokerResponse {
-  constructor(requestId:string, client: string){
+  constructor(requestId: string, client: string){
     super('EnableLogPointResponse', requestId, client);
   }
 }
 
 export class DisableLogPointResponse extends BrokerResponse {
-  constructor(requestId:string, client: string){
+  constructor(requestId: string, client: string){
     super('DisableLogPointResponse', requestId, client);
+  }
+}
+
+export class EnableProbeTagResponse extends BrokerResponse {
+  constructor(requestId: string, client: string){
+    super('EnableProbeTagResponse', requestId, client);
+  }
+}
+
+export class DisableProbeTagResponse extends BrokerResponse {
+  constructor(requestId: string, client: string){
+    super('DisableProbeTagResponse', requestId, client);
+  }
+}
+
+export class GetConfigResponse extends BrokerResponse {
+  config: { [key: string]: any}
+
+  constructor(requestId: string, client: string){
+    super('GetConfigResponse', requestId, client);
+  }
+}
+
+export class UpdateConfigResponse extends BrokerResponse {
+  constructor(requestId: string, client: string){
+    super('UpdateConfigResponse', requestId, client);
+  }
+}
+
+export class AttachResponse extends BrokerResponse {
+  constructor(requestId: string, client: string){
+    super('AttachResponse', requestId, client);
+  }
+}
+
+export class DetachResponse extends BrokerResponse {
+  constructor(requestId: string, client: string){
+    super('DetachResponse', requestId, client);
   }
 }
 

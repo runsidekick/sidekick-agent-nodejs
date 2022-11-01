@@ -6,6 +6,7 @@ export const ConfigNames = {
         apiKey: 'SIDEKICK_APIKEY',
         logLevel: 'SIDEKICK_AGENT_LOG_LEVEL',
         disable: 'SIDEKICK_AGENT_DISABLE',
+        silent: 'SIDEKICK_AGENT_SILENT',
         rejectOnStartup: 'SIDEKICK_AGENT_REJECT_ON_STARTUP',
     },
     broker: {
@@ -63,6 +64,16 @@ export const ConfigNames = {
         }
     }
 };
+
+export const EditableConfigNames: { [key: string]: string } = {
+    silent: ConfigNames.agent.silent,
+    maxFrames: ConfigNames.capture.maxFrames,
+    maxExpandFrames: ConfigNames.capture.maxExpandFrames,
+    maxProperties: ConfigNames.capture.maxProperties,
+    maxParseDepth: ConfigNames.capture.maxParseDepth,
+    errorCollectionEnable: ConfigNames.errorCollection.enable,
+    errorCollectionEnableCaptureFrame: ConfigNames.errorCollection.captureFrame,
+}
 
 export interface SidekickConfig extends BaseConfig {
     /**

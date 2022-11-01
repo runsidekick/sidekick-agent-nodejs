@@ -5,12 +5,15 @@ import {
     BaseConfigMetaData,
     ConfigProviderModel
 } from "../types";
+import { EditableConfigNames } from './ConfigNames';
 
 export default class ConfigProvider {
 
     static configMetadata: BaseConfigMetaData<BaseConfig>;
 
     static config: BaseConfig;
+
+    static configChangedSubscribers = new Set<(change: { [key: string]: any }) => void>();
 
     static init(configProviderModel: ConfigProviderModel<BaseConfig, BaseConfigMetaData<BaseConfig>>): void {
         ConfigProvider.configMetadata = configProviderModel && configProviderModel.configMetaData || {} as BaseConfigMetaData<BaseConfig>;
@@ -68,8 +71,12 @@ export default class ConfigProvider {
         const value: T = ConfigProvider.config[key] 
             || (ConfigProvider.configMetadata[key] && ConfigProvider.configMetadata[key].key 
                 ? ConfigProvider.config[ConfigProvider.configMetadata[key].key] : undefined);
-        const type = ConfigProvider.configMetadata[key].type;
 
+        if (value == undefined && !ConfigProvider.configMetadata[key]) {
+            return;
+        }
+
+        const type = ConfigProvider.configMetadata[key].type;
         let result = value;
         if (result == undefined) {
             if (defaultValue !== undefined) {
@@ -79,6 +86,44 @@ export default class ConfigProvider {
             }
         }
 
-        return TypeCastUtils.castToType(result, type) as T;
+        let resultValue = result;
+        if (ConfigProvider.configMetadata[key].get) {
+            resultValue = ConfigProvider.configMetadata[key].get(result);
+        }
+
+        return TypeCastUtils.castToType(resultValue, type) as T;
+    }
+
+    static update(candidateConfig: { [key: string]: any }) {
+        let changed = false;
+        let change: { [key: string]: any} = {}
+        Object.keys(candidateConfig || {}).forEach(key => {
+            const environmentKey = EditableConfigNames[key];
+            if (environmentKey) {
+                const key = ConfigProvider.configMetadata[environmentKey] 
+                    ? ConfigProvider.configMetadata[environmentKey].key
+                    : undefined;
+
+                if (key && ConfigProvider.config[key] != candidateConfig[key]) {
+                    ConfigProvider.config[key] = candidateConfig[key];
+                    change[key] = candidateConfig[key];
+                    changed = true;
+                }
+            }
+        });
+
+        if (changed) {
+            ConfigProvider.configChangedSubscribers.forEach(subscriber => {
+                subscriber(change);
+            });
+        }
+    }
+
+    static subscribeConfigChanged(callback: (change: { [key: string]: any }) => void) {
+        ConfigProvider.configChangedSubscribers.add(callback);
+    }
+
+    static unsubscribeConfigChanged(callback: (change: { [key: string]: any }) => void) {
+        ConfigProvider.configChangedSubscribers.delete(callback);
     }
 }

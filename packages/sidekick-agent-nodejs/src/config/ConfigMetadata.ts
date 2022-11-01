@@ -1,9 +1,11 @@
 import { BaseConfigMetaData } from '../types';
 import { SidekickConfig, ConfigNames } from './ConfigNames';
+import { CONFIG_CONSTANT } from '../constants';
+import ConfigUtils from '../utils/ConfigUtils';
 
 export type SidekickConfigMetaData = BaseConfigMetaData<SidekickConfig | {}> ;
 
-export default {
+const ConfigMetadata = {
     [ConfigNames.agent.apiKey]: {
         key: 'apiKey',
         type: 'string',
@@ -12,22 +14,27 @@ export default {
     [ConfigNames.broker.host]: {
         key: 'brokerHost',
         type: 'string',
-        default: 'wss://broker.service.runsidekick.com'
+        default: CONFIG_CONSTANT[ConfigNames.broker.host].default
     },
     [ConfigNames.broker.port]: {
         key: 'brokerPort',
         type: 'number',
-        default: 443
+        default: CONFIG_CONSTANT[ConfigNames.broker.port].default
     },
     [ConfigNames.agent.logLevel]: {
         key: 'logLevel',
         type: 'string',
-        default: 'info',
+        default: CONFIG_CONSTANT[ConfigNames.agent.logLevel].default
     },
     [ConfigNames.agent.disable]: {
         key: 'disable',
         type: 'boolean',
-        default: false,
+        default: CONFIG_CONSTANT[ConfigNames.agent.disable].default
+    },
+    [ConfigNames.agent.silent]: {
+        key: 'silent',
+        type: 'boolean',
+        default: CONFIG_CONSTANT[ConfigNames.agent.silent].default,
     },
     [ConfigNames.application.tag]: {
         key: 'applicationTag',
@@ -56,27 +63,27 @@ export default {
     [ConfigNames.debugApi.resetV8Debugger]: {
         key: 'resetV8Debugger',
         type: 'boolean',
-        default: true,
+        default: CONFIG_CONSTANT[ConfigNames.debugApi.resetV8Debugger].default,
     },
     [ConfigNames.debugApi.resetV8DebuggerThreshold]: {
         key: 'resetV8DebuggerThreshold',
         type: 'number',
-        default: 100,
+        default: CONFIG_CONSTANT[ConfigNames.debugApi.resetV8DebuggerThreshold].default,
     },
     [ConfigNames.debugApi.enableAsyncCallStack]: {
         key: 'enableAsyncCallStack',
         type: 'boolean',
-        default: false,
+        default: CONFIG_CONSTANT[ConfigNames.debugApi.enableAsyncCallStack].default,
     },
     [ConfigNames.debugApi.cleanupAsyncCallStackInterval]: {
         key: 'cleanupAsyncCallstackInterval',
         type: 'number',
-        default: 30 * 1000,
+        default: CONFIG_CONSTANT[ConfigNames.debugApi.cleanupAsyncCallStackInterval].default,
     },
     [ConfigNames.scriptStore.disablePositionCache]: {
         key: 'disablePositionCache',
         type: 'boolean',
-        default: false,
+        default: CONFIG_CONSTANT[ConfigNames.scriptStore.disablePositionCache].default,
     },
     [ConfigNames.scriptStore.whilelistModule]: {
         key: 'whilelistModule',
@@ -85,62 +92,66 @@ export default {
     [ConfigNames.scriptStore.hashCheckEnable]: {
         key: 'hashCheckEnable',
         type: 'boolean',
-        default: false,
+        default: CONFIG_CONSTANT[ConfigNames.scriptStore.hashCheckEnable].default,
     },
     [ConfigNames.rateLimit.inMinute]: {
         key: 'inMinute',
         type: 'number',
-        default: 200,
+        default: CONFIG_CONSTANT[ConfigNames.rateLimit.inMinute].default,
     },
     [ConfigNames.capture.maxFrames]: {
         key: 'maxFrames',
         type: 'number',
-        default: 20,
+        default: CONFIG_CONSTANT[ConfigNames.capture.maxFrames].default,
+        get: (value: any) => ConfigUtils.getAvailableNumberValue(value, ConfigNames.capture.maxFrames)
     },
     [ConfigNames.capture.maxExpandFrames]: {
         key: 'maxExpandFrames',
         type: 'number',
-        default: 1,
+        default: CONFIG_CONSTANT[ConfigNames.capture.maxExpandFrames].default,
+        get: (value: any) => ConfigUtils.getAvailableNumberValue(value, ConfigNames.capture.maxExpandFrames)
     },
     [ConfigNames.capture.maxProperties]: {
         key: 'maxProperties',
         type: 'number',
-        default: 10,
+        default: CONFIG_CONSTANT[ConfigNames.capture.maxProperties].default,
+        get: (value: any) => ConfigUtils.getAvailableNumberValue(value, ConfigNames.capture.maxProperties)
     },
     [ConfigNames.capture.maxParseDepth]: {
         key: 'maxParseDepth',
         type: 'number',
-        default: 3,
+        default: CONFIG_CONSTANT[ConfigNames.capture.maxParseDepth].default,
+        get: (value: any) => ConfigUtils.getAvailableNumberValue(value, ConfigNames.capture.maxParseDepth)
     },
     [ConfigNames.capture.propertyAccessClassification]: {
         key: 'propertyAccessClassification',
         type: 'string',
-        default: 'ENUMERABLE-OWN',
+        default: CONFIG_CONSTANT[ConfigNames.capture.propertyAccessClassification].default,
     },
     [ConfigNames.sourceCode.minified]: {
         key: 'minified',
         type: 'boolean',
-        default: false,
+        default: CONFIG_CONSTANT[ConfigNames.sourceCode.minified].default,
     },
     [ConfigNames.broker.client]: {
         key: 'brokerClient',
         type: 'string',
-        default: 'default',
+        default: CONFIG_CONSTANT[ConfigNames.broker.client].default,
     },
     [ConfigNames.taskExecutionQueue.concurrency]: {
         key: 'tastExecutionQueueConcurrency',
         type: 'number',
-        default: 5,
+        default: CONFIG_CONSTANT[ConfigNames.taskExecutionQueue.concurrency].default
     },
     [ConfigNames.taskExecutionQueue.maxSize]: {
         key: 'tastExecutionQueueMaxSize',
         type: 'number',
-        default: 10,
+        default: CONFIG_CONSTANT[ConfigNames.taskExecutionQueue.maxSize].default
     },
     [ConfigNames.agent.rejectOnStartup]: {
         key: 'rejectOnStartup',
         type: 'boolean',
-        default: false,
+        default: CONFIG_CONSTANT[ConfigNames.agent.rejectOnStartup].default
     },
     [ConfigNames.scriptStore.prefix]: {
         key: 'scriptPrefix',
@@ -159,21 +170,23 @@ export default {
     [ConfigNames.errorCollection.enable]: {
         key: 'errorCollectionEnable',
         type: 'boolean',
-        default: false,
+        default: CONFIG_CONSTANT[ConfigNames.errorCollection.enable].default,
     },
     [ConfigNames.errorCollection.captureFrame]: {
         key: 'errorCollectionEnableCaptureFrame',
         type: 'boolean',
-        default: false,
+        default: CONFIG_CONSTANT[ConfigNames.errorCollection.captureFrame].default,
     },
     [ConfigNames.errorCollection.rateLimit.pointInMinute]: {
         key: 'errorCollectionRateLimitPointInMinute',
         type: 'number',
-        default: 10,
+        default: CONFIG_CONSTANT[ConfigNames.errorCollection.rateLimit.pointInMinute].default,
     },
     [ConfigNames.errorCollection.rateLimit.totalInMinute]: {
         key: 'errorCollectionRateLimitTotalInMinute',
         type: 'number',
-        default: 100,
+        default: CONFIG_CONSTANT[ConfigNames.errorCollection.rateLimit.totalInMinute].default,
     }
-} as SidekickConfigMetaData;
+} as SidekickConfigMetaData
+
+export default ConfigMetadata;

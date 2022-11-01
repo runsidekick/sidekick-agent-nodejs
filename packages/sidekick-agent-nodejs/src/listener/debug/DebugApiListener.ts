@@ -1,9 +1,9 @@
 import DebugApi, { DebugApiEventNames } from "../../api/internal/debug/DebugApi";
-import { SimpleListener } from "../Listener";
+import { SimpleApiListener } from "../Listener";
 import ApiStatus from '../../api/status/ApiStatus';
 import Logger from '../../logger';
 
-export default class DebugApiListener extends SimpleListener {
+export default class DebugApiListener extends SimpleApiListener {
     private debugApi: DebugApi;
 
     constructor(debugApi: DebugApi, apiStatus: ApiStatus) {

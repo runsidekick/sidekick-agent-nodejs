@@ -6,6 +6,8 @@ import CommunicationManager from "../../api/external/communication/Communication
 import CommunicationUtils from "../../utils/CommunicationUtils";
 import { Message } from "../../types";
 import DebugApi from "../../api/internal/debug/DebugApi";
+import ConfigProvider from "../../config/ConfigProvider";
+import { ConfigNames } from "../../config/ConfigNames";
 import Logger from '../../logger';
 
 export default class CommunicationApiListener extends MessageHandlerListener {
@@ -37,12 +39,14 @@ export default class CommunicationApiListener extends MessageHandlerListener {
                 const open = () => {
                     this.firstConnection = false;
                     this.errorMessageDisplayed = false;
+                    this.retryConnection = true;
                     Logger.info('<CommunicationApiListener> Communication api listening.');
                     CommunicationManager.setCommunicationApi(this.communicationApi);
                     this.apiStatus.setStatus(this.communicationApi.constructor.name, true);
                     this.communicationApi.on(CommunicationApiEventNames.MESSAGE, this.onMessage);
                     CommunicationManager.sendRequest(CommunicationUtils.createTracepointFilterRequest());
                     CommunicationManager.sendRequest(CommunicationUtils.createLogpointFilterRequest());
+                    CommunicationManager.sendRequest(CommunicationUtils.createGetConfigRequest());
                     resolve();
                 }
 
@@ -61,6 +65,12 @@ export default class CommunicationApiListener extends MessageHandlerListener {
                     Logger.debug('<CommunicationApiListener> Communication api connection closed.');
                     this.apiStatus.setStatus(this.communicationApi.constructor.name, false);
                     this.communicationApi.removeListener(CommunicationApiEventNames.MESSAGE, this.onMessage);
+                    if (ConfigProvider.get(ConfigNames.agent.silent)) {
+                        Logger.debug('<CommunicationApiListener> Retry process skipped. Agent in silent mode.');
+                        this.retryConnection = false;
+                        return;
+                    }
+                    
                     if (this.retryConnection) {
                         setTimeout(() => {
                             Logger.debug('<CommunicationApiListener> Try to reconnect communication api.');

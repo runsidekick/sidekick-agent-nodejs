@@ -1,11 +1,11 @@
 
 import LogpointManager from '../../../../../manager/LogpointManager';
 import { FilterLogPointsResponse, Logpoint } from '../../../../../../../types';
-import logPointsResponseHandler from './LogPointsResponseHandler';
+import LogPointsResponseHandler from './LogPointsResponseHandler';
 import Logger from '../../../../../../../logger';
 import CommunicationManager from '../../../../../communication/CommunicationManager';
 
-export default class FilterLogPointsResponseHandler extends logPointsResponseHandler { 
+export default class FilterLogPointsResponseHandler extends LogPointsResponseHandler { 
     constructor(logpointManager: LogpointManager) {
         super(logpointManager);
     }

@@ -8,6 +8,12 @@ const BreakpointMethod = (param) => {
     return field1;
 }
 
+const CallerBreakpointMethod = (param) => {
+    const callerField = 'CallerBreakpointMethod';
+    return BreakpointMethod(param);
+}
+
 module.exports = {
     BreakpointMethod,
+    CallerBreakpointMethod,
 } 

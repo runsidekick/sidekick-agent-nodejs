@@ -36,7 +36,8 @@ describe('Logpoint Event Test', function () {
 
         logPointId = ProbeUtils.getProbeId({
             ...PutLogPointRequest,
-            id: PutLogPointRequest.logPointId
+            id: PutLogPointRequest.logPointId,
+            type: 'Logpoint',
         });
     });
     

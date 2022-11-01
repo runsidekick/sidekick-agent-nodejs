@@ -7,17 +7,19 @@ import { ERROR_PROBE_STORE_ID } from '../../constants';
 export default class ProbeStore {
     protected locationMap: Map<string, string>;
     protected breakpointProbeMap: Map<string, Set<string>>;
-    protected probes: Map<string, ProbeAction<ProbeContext>>;
+    protected probeMap: Map<string, ProbeAction<ProbeContext>>;
+    protected tagProbeMap: Map<string, Set<string>>;
 
     constructor() {
         this.locationMap = new Map();
         this.breakpointProbeMap = new Map();
-        this.probes = new Map();
+        this.probeMap = new Map();
+        this.tagProbeMap = new Map();
     }
 
     getAllProbeContexts(): ProbeContext[] {
         const contexts: ProbeContext[] = [];
-        for(const [key, value] of this.probes) {
+        for(const [key, value] of this.probeMap) {
             if (key === ERROR_PROBE_STORE_ID) {
                 continue;
             }
@@ -30,7 +32,7 @@ export default class ProbeStore {
 
     getAllProbes(): Probe[] {
         const probes: Probe[] = [];
-        for(const [key, value] of this.probes) {
+        for(const [key, value] of this.probeMap) {
             if (key === ERROR_PROBE_STORE_ID) {
                 continue;
             }
@@ -42,7 +44,7 @@ export default class ProbeStore {
     }
 
     get(probeId: string): ProbeAction<ProbeContext> {
-        return this.probes.get(probeId);
+        return this.probeMap.get(probeId);
     }
 
     getProbeIds(v8BreakpointId: string): Set<string> {
@@ -58,6 +60,10 @@ export default class ProbeStore {
         return this.breakpointProbeMap.get(v8BreakpointId);
     }
 
+    getProbeByTag(tag: string): Set<string> {
+        return this.tagProbeMap.get(tag);
+    }
+
     set(v8BreakpointId: string, action: ProbeAction<ProbeContext>): boolean {
         const probeId = action.getId();
         const locationId = action.getLocationId();
@@ -68,13 +74,22 @@ export default class ProbeStore {
         }
 
         this.breakpointProbeMap.get(v8BreakpointId).add(probeId);
-        this.probes.set(probeId, action);
+        this.probeMap.set(probeId, action);
+
+        (action.getContext().getTags() || []).forEach(tag => {
+            if (!this.tagProbeMap.has(tag)) {
+                this.tagProbeMap.set(tag, new Set<string>());
+            }
+
+            this.tagProbeMap.get(tag).add(probeId);
+        });
+
         return true;
     }
 
     delete(probeId: string): void {
-        if (this.probes.has(probeId)) {
-            const probeAction = this.probes.get(probeId);
+        if (this.probeMap.has(probeId)) {
+            const probeAction = this.probeMap.get(probeId);
             const v8BreakpointId = probeAction.getV8BreakpointId();
             const probeRefs = this.breakpointProbeMap.get(v8BreakpointId);
             if (probeRefs) {
@@ -86,12 +101,24 @@ export default class ProbeStore {
                 }
             }
 
-            this.probes.delete(probeId);
+            (probeAction.getContext().getTags() || []).forEach(tag => {
+                const probeTagRefs = this.tagProbeMap.get(tag);
+                if (probeTagRefs) {
+                    probeTagRefs.delete(probeId);
+    
+                    if (probeTagRefs.size == 0) {
+                        this.tagProbeMap.delete(tag);
+
+                    }
+                }
+            });
+
+            this.probeMap.delete(probeId);
         }
     }
 
     deleteExpiredProbes() {
-        this.probes.forEach((probeAction: ProbeAction<ProbeContext>) => {
+        this.probeMap.forEach((probeAction: ProbeAction<ProbeContext>) => {
             if (probeAction.getContext().isExpired()) {
                 this.delete(probeAction.getId());
             }
@@ -101,7 +128,7 @@ export default class ProbeStore {
     clear(): void {
         this.breakpointProbeMap.clear();
         this.locationMap.clear();
-        this.probes.clear();
+        this.probeMap.clear();
     }
 
     isV8BreakpointExistOnLocation(probe: Probe): boolean {

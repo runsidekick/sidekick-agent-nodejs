@@ -1,12 +1,11 @@
 import TracepointManager from "../../../manager/TracepointManager";
 import LogpointManager from "../../../manager/LogpointManager";
+import TagManager from "../../../manager/TagManager";
+import ConfigManager from "../../../manager/ConfigManager";
 import Handler from "../../../../../handler/Handler";
-import { ApplicationStatusEvent, CommunicationApiData } from "../../../../../types";
+import { CommunicationApiData } from "../../../../../types";
 import * as ProbeErrors from '../../../../../error/ProbeErrors';
 import ProbeUtils from "../../../../../utils/ProbeUtils";
-import Application from "../../../../../application/Application";
-import UuidUtils from "../../../../../utils/UuidUtils";
-import CommunicationManager from "../../CommunicationManager";
 
 export default abstract class BrokerHandler implements Handler {
     abstract handle(data: CommunicationApiData): any | undefined;
@@ -49,6 +48,30 @@ export abstract class BrokerLogPointHandler extends BrokerHandler {
         super();
 
         this.logpointManager = logpointManager;
+    }
+
+    abstract handle(data: CommunicationApiData): any | undefined;
+}
+
+export abstract class BrokerTagHandler extends BrokerHandler {
+    protected tagManager: TagManager;
+    
+    constructor(tagManager: TagManager) {
+        super();
+
+        this.tagManager = tagManager;
+    }
+
+    abstract handle(data: CommunicationApiData): any | undefined;
+}
+
+export abstract class BrokerConfigHandler extends BrokerHandler {
+    protected configManager: ConfigManager;
+    
+    constructor(configManager: ConfigManager) {
+        super();
+
+        this.configManager = configManager;
     }
 
     abstract handle(data: CommunicationApiData): any | undefined;

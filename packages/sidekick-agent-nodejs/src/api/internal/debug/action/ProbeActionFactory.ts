@@ -16,6 +16,25 @@ import { ConfigNames } from "../../../../config/ConfigNames";
 import ConfigProvider from "../../../../config/ConfigProvider";
 import { DefaultRateLimiter } from '../../../../limit/rate/RateLimiter';
 import ErrorRateLimitedProbeAction from "./ErrorRateLimitedProbeAction";
+import { ProbeActionType } from '../../../../types';
+
+const actions: Record<ProbeActionType, <C extends ProbeContext>(delegatedAction: ProbeAction<C>) => ProbeAction<C>> = {
+    'ConditionAwareProbeAction': (delegatedAction) => {
+        return new ConditionAwareProbeAction(delegatedAction);
+    },
+    'RateLimitedProbeAction': (delegatedAction) => {
+        return new RateLimitedProbeAction(
+            delegatedAction,
+            new DefaultRateLimiter(ConfigProvider.get<number>(ConfigNames.rateLimit.inMinute))
+        );
+    },
+    'ErrorRateLimitedProbeAction': (delegatedAction) => {
+        return new ErrorRateLimitedProbeAction(delegatedAction);
+    },
+    'ExpiringProbeAction': (delegatedAction) => {
+        return new ExpiringProbeAction(delegatedAction);
+    },
+}
 
 export default class ProbeActionFactory {
     static getAction(
@@ -23,55 +42,51 @@ export default class ProbeActionFactory {
         scriptStore: ScriptStore,
         v8InspectorApi: V8InspectorApi
     ): ProbeAction<ProbeContext> {
-
-        const inMinute = ConfigProvider.get<number>(ConfigNames.rateLimit.inMinute);
-        switch(probeInfo.probe.action) {
+        let probeAction: ProbeAction<ProbeContext>;
+        switch(probeInfo.probe.type) {
             case 'Tracepoint':
-                return new ConditionAwareProbeAction(
-                    new RateLimitedProbeAction(
-                        new ExpiringProbeAction(
-                            new TracePointAction(
-                                new TracePointContext(
-                                    probeInfo.v8BreakpointId,
-                                    probeInfo.probe,
-                                    probeInfo.generatedPosition,
-                                ), 
-                                scriptStore, 
-                                v8InspectorApi),
-                        ),
-                        new DefaultRateLimiter(inMinute)
-                    ),
-                    v8InspectorApi,
-                );
+                probeAction = new TracePointAction(
+                    new TracePointContext(
+                        probeInfo.v8BreakpointId,
+                        probeInfo.probe,
+                        probeInfo.generatedPosition,
+                    ), 
+                    scriptStore, 
+                    v8InspectorApi);
+
+                break;
             case 'Logpoint':
-                return new ConditionAwareProbeAction(
-                    new RateLimitedProbeAction(
-                        new ExpiringProbeAction(
-                            new LogPointAction(
-                                new LogPointContext(
-                                    probeInfo.v8BreakpointId,
-                                    probeInfo.probe,
-                                    probeInfo.generatedPosition,
-                                ), 
-                                scriptStore, 
-                                v8InspectorApi),
-                        ),
-                        new DefaultRateLimiter(inMinute)
-                    ),
-                    v8InspectorApi,
-                );
+                probeAction = new LogPointAction(
+                    new LogPointContext(
+                        probeInfo.v8BreakpointId,
+                        probeInfo.probe,
+                        probeInfo.generatedPosition,
+                    ), 
+                    scriptStore, 
+                    v8InspectorApi);
+
+                break;
             case 'ErrorStack':
-                return new ErrorRateLimitedProbeAction(
-                    new ErrorStackAction(
-                        new ErrorStackContext(
-                            probeInfo.v8BreakpointId,
-                            probeInfo.probe,
-                        ),
-                        scriptStore, 
-                        v8InspectorApi)
-                );
+                probeAction = new ErrorStackAction(
+                    new ErrorStackContext(
+                        probeInfo.v8BreakpointId,
+                        probeInfo.probe,
+                    ),
+                    scriptStore, 
+                    v8InspectorApi);
+
+                break;
             default:
                 return;
         }
+
+        probeInfo.probe.actions.forEach(action => {
+            const actionWrapper = actions[action];
+            if (actionWrapper) {
+                probeAction = actionWrapper(probeAction);
+            }
+        });
+
+        return probeAction;
     }
 }

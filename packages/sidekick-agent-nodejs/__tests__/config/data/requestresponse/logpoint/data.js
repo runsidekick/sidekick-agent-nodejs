@@ -31,7 +31,7 @@ const DisableLogPointRequest = {
 };
 
 const UpdateLogPointRequest = {
-    id: '3',
+    id: '4',
     name: 'UpdateLogPointRequest',
     type: 'Request',
     client: 'test',
@@ -41,9 +41,25 @@ const UpdateLogPointRequest = {
     expireCount: 3,
 };
 
+const EnableProbeTagRequest = {
+    id: '5',
+    name: 'EnableProbeTagRequest',
+    type: 'Request',
+    tag: 'tag1'
+}
+
+const DisableProbeTagRequest = {
+    id: '6',
+    name: 'DisableProbeTagRequest',
+    type: 'Request',
+    tag: 'tag1'
+}
+
 module.exports = {
     PutLogPointRequest,
     EnableLogPointRequest,
     DisableLogPointRequest,
-    UpdateLogPointRequest
+    UpdateLogPointRequest,
+    EnableProbeTagRequest,
+    DisableProbeTagRequest,
 }
