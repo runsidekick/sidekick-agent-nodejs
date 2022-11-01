@@ -1,6 +1,6 @@
 {
   "name": "@runsidekick/sidekick-agent-nodejs",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Sidekick node.js agent",
   "author": "Sidekick Team",
   "homepage": "https://github.com/runsidekick/sidekick-agent-nodejs/tree/main/packages/sidekick-agent-nodejs#readme",
