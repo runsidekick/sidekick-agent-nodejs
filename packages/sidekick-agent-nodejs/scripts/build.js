@@ -11,7 +11,7 @@ const makeAllPackagesExternalPlugin = {
 build({
     bundle: true,
     minify: true,
-    target: "node10",
+    target: "node14",
     platform: "node",
     entryPoints: ["./src/index.ts"],
     outfile: "./dist/index.js",
