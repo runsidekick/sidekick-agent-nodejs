@@ -128,7 +128,8 @@ export type LogPointRequestName =
 
 export type TagRequestName = 
 | 'EnableProbeTagRequest'
-| 'DisableProbeTagRequest';
+| 'DisableProbeTagRequest'
+| 'RemoveProbeTagRequest';
 
 export type SilentRequestName = 
 | 'AttachRequest'
@@ -314,6 +315,10 @@ export type DisableProbeTagRequest = BrokerRequest & {
   tag: string;
 }
 
+export type RemoveProbeTagRequest = BrokerRequest & { 
+  tag: string;
+}
+
 export class GetConfigRequest extends BrokerRequest {
   constructor(
     id: string,
@@ -353,7 +358,8 @@ export type LogPointResponseName =
 
 export type TagResponseName = 
 | 'EnableProbeTagResponse'
-| 'DisableProbeTagResponse';
+| 'DisableProbeTagResponse'
+| 'RemoveProbeTagResponse';
 
 export type ConfigResponseName = 
 | 'GetConfigResponse'
@@ -520,6 +526,12 @@ export class EnableProbeTagResponse extends BrokerResponse {
 export class DisableProbeTagResponse extends BrokerResponse {
   constructor(requestId: string, client: string){
     super('DisableProbeTagResponse', requestId, client);
+  }
+}
+
+export class RemoveProbeTagResponse extends BrokerResponse {
+  constructor(requestId: string, client: string){
+    super('RemoveProbeTagResponse', requestId, client);
   }
 }
 

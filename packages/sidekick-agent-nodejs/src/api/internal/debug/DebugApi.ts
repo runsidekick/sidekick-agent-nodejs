@@ -30,6 +30,7 @@ export default interface DebugApi extends ConnectableApi {
     getAll(): Probe[];
     getByLocationId(locationId: string): Set<string>;
     getByTag(tag: string): Set<string>;
+    removeTag(tag: string): void;
     add(probe: Probe): void;
     update(probe: Probe): void;
     delete(probe: Probe): void;
@@ -112,6 +113,10 @@ export class DefaultDebugApi extends EventEmitter implements DebugApi {
 
     getByTag(tag: string): Set<string> {
         return this.probeStore.getProbeByTag(tag);
+    }
+
+    removeTag(tag: string) {
+        this.probeStore.removeProbeTag(tag);
     }
 
     add(probe: Probe): void {

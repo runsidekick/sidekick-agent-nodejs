@@ -64,6 +64,10 @@ export default class ProbeStore {
         return this.tagProbeMap.get(tag);
     }
 
+    removeProbeTag(tag: string): void {
+        this.tagProbeMap.delete(tag);
+    }
+
     set(v8BreakpointId: string, action: ProbeAction<ProbeContext>): boolean {
         const probeId = action.getId();
         const locationId = action.getLocationId();
