@@ -3,6 +3,7 @@ import DebugApi from "../../../api/internal/debug/DebugApi";
 export default interface TagManager {
     enableTag(tag: string): void;
     disableTag(tag: string): void;
+    removeTag(tag: string): void;
 }
 
 export class DefaultTagManager implements TagManager {
@@ -26,5 +27,9 @@ export class DefaultTagManager implements TagManager {
             const probe = this.debugApi.get(probeId);
             this.debugApi.disable(probe);
         });
-    } 
+    }
+
+    removeTag(tag: string): void {
+        this.debugApi.removeTag(tag);
+    }
 }

@@ -15,6 +15,7 @@ import RemoveBatchLogPointRequestHandler from "./logpoint/RemoveBatchLogPointReq
 import UpdateLogPointRequestHandler from "./logpoint/UpdateLogPointRequestHandler";
 import EnableProbeTagRequestHandler from "./tag/EnableProbeTagRequestHandler";
 import DisableProbeTagRequestHandler from "./tag/DisableProbeTagRequestHandler";
+import RemoveProbeTagRequestHandler from "./tag/RemoveProbeTagRequestHandler";
 import UpdateConfigRequestHandler from "./config/UpdateConfigRequestHandler";
 import AttachRequestHandler from "./config/AttachRequestHandler";
 import DetachRequestHandler from "./config/DetachRequestHandler";
@@ -46,6 +47,7 @@ export default class RequestHandlerContainer implements HandlerContainer {
             ['UpdateLogPointRequest', new UpdateLogPointRequestHandler(logpointManager)],
             ['EnableProbeTagRequest', new EnableProbeTagRequestHandler(tagManager)],
             ['DisableProbeTagRequest', new DisableProbeTagRequestHandler(tagManager)],
+            ['RemoveProbeTagRequest', new RemoveProbeTagRequestHandler(tagManager)],
             ['UpdateConfigRequest', new UpdateConfigRequestHandler(configManager)],
             ['AttachRequest', new AttachRequestHandler(configManager)],
             ['DetachRequest', new DetachRequestHandler(configManager)],
